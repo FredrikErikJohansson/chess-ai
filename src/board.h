@@ -17,6 +17,7 @@
 class Board {
 public:
 	void initialize();
+	void clear();
 	
 	Bitboard get_all_white_pieces() const;
     Bitboard get_all_black_pieces() const;
@@ -38,4 +39,5 @@ public:
 private:
 	std::array<std::array<Bitboard, 6>, 2> pieces = {};
 	std::array<Bitboard, 2> enpessant = {};
+	std::array<Bitboard, 2> castle = {};
 };
