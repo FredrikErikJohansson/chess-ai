@@ -23,11 +23,12 @@ public:
     Bitboard get_all_black_pieces() const;
     Bitboard get_all_pieces() const;
 
-	Bitboard get_pieces(uint i, uint j) { return pieces[i][j]; }
+	// TODO: make a setter instead of changing to get value
+	Bitboard& get_pieces(uint color, uint type) { return pieces[color][type]; }
     //std::array<Bitboard, 6> get_white() { return pieces[0]; }
     //std::array<Bitboard, 6> get_black() { return pieces[1]; }
 
-	Bitboard get_enpessant(uint i) { return enpessant[i]; }
+	Bitboard get_enpessant(uint color) { return enpessant[color]; }
 
 	void print() const;
 	void print(Bitboard const&) const;
@@ -39,5 +40,5 @@ public:
 private:
 	std::array<std::array<Bitboard, 6>, 2> pieces = {};
 	std::array<Bitboard, 2> enpessant = {};
-	std::array<Bitboard, 2> castle = {};
+	bool can_castle = true;
 };

@@ -3,18 +3,34 @@
 #include "bitboards.h"
 #include "board.h"
 
-Bitboard Movegen::get_bishop_moves(uint_fast16_t pos, bool color, Board* board) {
+
+void Movegen::make_move(Bitboard& from, Bitboard& to, bool color, uint type, Board* board) {
+    Bitboard from_to_bb = from ^ to;
+    board->get_pieces(color, type) ^= from_to_bb;
+}
+
+std::vector<Bitboard> Movegen::seperate_bitboards(Bitboard const& bb) {
+    std::vector<Bitboard> res;
+    uint_fast64_t idx = 0b1;
+    for(uint_fast16_t i = 0; i < 64; ++i) {
+        if((bb & (idx << i)) != 0) res.push_back((bb & (idx << i)));
+    }
+    return res;
+}
+
+Bitboard Movegen::get_bishop_moves(Bitboard bb, bool color, Board* board) {
+    uint_fast16_t pos = log2(bb & -bb);
     Bitboard index = ((board->get_all_pieces() & BOccupancy[pos]) * BMagic[pos]) >> (64-BBits[pos]);
     return bishopMoves[pos][index] & ~(color ? board->get_all_white_pieces() : board->get_all_black_pieces());
 }
 
-Bitboard Movegen::get_rook_moves(uint_fast16_t pos, bool color, Board* board) {
+Bitboard Movegen::get_rook_moves(Bitboard bb, bool color, Board* board) {
+    uint_fast16_t pos = log2(bb & -bb);
     Bitboard index = ((board->get_all_pieces() & ROccupancy[pos]) * RMagic[pos]) >> (64-RBits[pos]);
     return rookMoves[pos][index] & ~(color ? board->get_all_white_pieces() : board->get_all_black_pieces());
 }
 
-Bitboard Movegen::get_knight_moves(uint_fast16_t pos, bool color, Board* board) {
-    Bitboard start = static_cast<Bitboard>(1) << pos;
+Bitboard Movegen::get_knight_moves(Bitboard start, bool color, Board* board) {
     Bitboard clear_A = Bitboards::COLUMN_CLEAR[0];
     Bitboard clear_AB = Bitboards::COLUMN_CLEAR[0] & Bitboards::COLUMN_CLEAR[1];
     Bitboard clear_H = Bitboards::COLUMN_CLEAR[7];
@@ -71,8 +87,7 @@ Bitboard Movegen::get_king_moves(bool color, Board* board) {
     return all_moves_possible & ~(color ? board->get_all_white_pieces() : board->get_all_black_pieces());
 }
 
-Bitboard Movegen::get_pawn_moves(uint_fast16_t pos, bool color, Board* board) {
-    Bitboard start = static_cast<Bitboard>(1) << pos;
+Bitboard Movegen::get_pawn_moves(Bitboard start, bool color, Board* board) {
     Bitboard left_attack;
     Bitboard right_attack;
     Bitboard pawn_one_forward;
@@ -96,8 +111,8 @@ Bitboard Movegen::get_pawn_moves(uint_fast16_t pos, bool color, Board* board) {
 }
 
 
-Bitboard Movegen::get_queen_moves(uint_fast16_t pos, bool color, Board* board) {
-    return get_rook_moves(pos, color, board) | get_bishop_moves(pos, color, board);
+Bitboard Movegen::get_queen_moves(Bitboard bb, bool color, Board* board) {
+    return get_rook_moves(bb, color, board) | get_bishop_moves(bb, color, board);
 }
 
 
