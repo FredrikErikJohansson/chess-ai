@@ -4,9 +4,21 @@
 #include "board.h"
 
 
-void Movegen::make_move(Bitboard& from, Bitboard& to, bool color, uint type, Board* board) {
-    Bitboard from_to_bb = from ^ to;
-    board->get_pieces(color, type) ^= from_to_bb;
+// TODO: Continue here
+void Movegen::make_move(Move move, Board* board) {
+    Bitboard from_to_bb = move.from ^ move.to;
+    board->get_pieces(move.color, move.type) ^= from_to_bb;
+    if(move.type == ROOK || move.type == KING) board->set_castle(move.color, false);
+    board->history.push(move);
+}
+
+//TODO: Unmake move
+void Movegen::unmake_move(Board* board) {
+    Move move = board->history.top();
+    Bitboard from_to_bb = move.from ^ move.to;
+    board->get_pieces(move.color, move.type) ^= from_to_bb;
+    //if(move.type == ROOK || move.type == KING) board->set_castle(move.color, true);
+    board->history.pop();
 }
 
 std::vector<Bitboard> Movegen::seperate_bitboards(Bitboard const& bb) {
@@ -16,6 +28,46 @@ std::vector<Bitboard> Movegen::seperate_bitboards(Bitboard const& bb) {
         if((bb & (idx << i)) != 0) res.push_back((bb & (idx << i)));
     }
     return res;
+}
+
+std::vector<Move> Movegen::get_moves_for(Bitboard from, bool color, uint type, Board* board) {
+    std::vector<Move> moves;
+    Move move;
+    move.from = from;
+    move.color = color;
+    move.type = type;
+    std::vector<Bitboard> to;
+
+    switch (type)
+    {
+    case PAWN:
+        to = seperate_bitboards(get_pawn_moves(from, color, board));
+        break;
+    case ROOK:
+        to = seperate_bitboards(get_rook_moves(from, color, board));
+        break;
+    case KNIGHT:
+        to = seperate_bitboards(get_knight_moves(from, color, board));
+        break;
+    case BISHOP:
+        to = seperate_bitboards(get_bishop_moves(from, color, board));
+        break;
+    case QUEEN:
+        to = seperate_bitboards(get_queen_moves(from, color, board));
+        break;
+    case KING:
+        to = seperate_bitboards(get_king_moves(color, board));
+        break;
+    default:
+        std::cerr << "Error: unknown type " << type << std::endl;
+        break;
+    }
+
+    for(auto t : to) {
+        move.to = t;
+        moves.push_back(move);
+    }
+    return moves;
 }
 
 Bitboard Movegen::get_bishop_moves(Bitboard bb, bool color, Board* board) {

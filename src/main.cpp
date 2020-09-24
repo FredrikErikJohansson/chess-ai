@@ -10,18 +10,29 @@ int main() {
     //chessBoard.print();
 
     Movegen moveGen = Movegen(&chessBoard);
-    std::vector<Bitboard> index;
+    std::vector<Bitboard> black_pawn_bb_pos;
+    //std::vector<Bitboard> black_pawn_bb_pos_moves;
+    //std::vector<Bitboard> black_pawn_bb_pos_moves;
     //std::vector<Bitboard> index2;
     //std::vector<Bitboard> index3;
-    index = moveGen.seperate_bitboards(chessBoard.get_pieces(BLACK, PAWN));
+    black_pawn_bb_pos = moveGen.seperate_bitboards(chessBoard.get_pieces(WHITE, KNIGHT)); //Seperated pawns
 
+    std::vector<Move> moves;
     //index = moveGen.seperate_bitboards(chessBoard.get_pieces(BLACK, PAWN));
+    moves = moveGen.get_moves_for(black_pawn_bb_pos[0], WHITE, KNIGHT, &chessBoard);
+    
+    // //for(auto ind : index) {
+    // for(auto bpbp : black_pawn_bb_pos) {
+    //     black_pawn_bb_pos_moves.push_back(moveGen.get_pawn_moves(bpbp, BLACK, &chessBoard)); // First pawn's moves
+    // }
+    // for(auto bpbpm : black_pawn_bb_pos_moves) {
+    //     black_pawn_bb_pos_moves = moveGen.seperate_bitboards(bpbpm); // First pawns seperated moves
+    // }
 
-    std::vector<Bitboard> move;
-    //for(auto ind : index) {
-    auto test = moveGen.get_pawn_moves(index[0], BLACK, &chessBoard);
-    move = moveGen.seperate_bitboards(test);
-    moveGen.make_move(index[0], move[0], BLACK, PAWN, &chessBoard);
+
+    moveGen.make_move(moves[0], &chessBoard); // First pawn do first move
+    chessBoard.print();
+    moveGen.unmake_move(&chessBoard);
     chessBoard.print();
     //}
 }
