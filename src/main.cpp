@@ -15,7 +15,7 @@ int main() {
     //std::vector<Bitboard> black_pawn_bb_pos_moves;
     //std::vector<Bitboard> index2;
     //std::vector<Bitboard> index3;
-    black_pawn_bb_pos = moveGen.seperate_bitboards(chessBoard.get_pieces(WHITE, KNIGHT)); //Seperated pawns
+    black_pawn_bb_pos = moveGen.seperate_bitboards(chessBoard.pieces[WHITE][KNIGHT]); //Seperated pawns
 
     std::vector<Move> moves;
     //index = moveGen.seperate_bitboards(chessBoard.get_pieces(BLACK, PAWN));
