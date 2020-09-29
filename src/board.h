@@ -19,6 +19,8 @@ struct Move {
     Bitboard from;
     Bitboard to;
     bool color;
+	bool capture = false;
+	bool castle = false;
     uint type;
 };
 

@@ -8,7 +8,11 @@
 void Movegen::make_move(Move move, Board* board) {
     Bitboard from_to_bb = move.from ^ move.to;
     board->pieces[move.color][move.type] ^= from_to_bb;
-    if(move.type == ROOK || move.type == KING) board->can_castle[move.color] = false;
+
+    if(move.type == ROOK || move.type == KING) { // Castle
+        if(board->can_castle[move.color]) move.castle = true;
+        board->can_castle[move.color] = false;
+    } 
     board->history.push(move);
 }
 
@@ -17,7 +21,9 @@ void Movegen::unmake_move(Board* board) {
     Move move = board->history.top();
     Bitboard from_to_bb = move.from ^ move.to;
     board->pieces[move.color][move.type] ^= from_to_bb;
-    //if(move.type == ROOK || move.type == KING) board->set_castle(move.color, true);
+    
+    if(move.castle) board->can_castle[move.color] = true; // Undo castle
+
     board->history.pop();
 }
 
