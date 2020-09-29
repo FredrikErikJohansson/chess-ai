@@ -10,6 +10,7 @@ public:
     Movegen(Board* board) { this->board = board; }
     Movegen() {};
 
+    // Maybe remove board from argument (everywhere)
     void make_move(Move, Board*);
     void unmake_move(Board*);
 

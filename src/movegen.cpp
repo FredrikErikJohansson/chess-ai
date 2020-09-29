@@ -4,25 +4,62 @@
 #include "board.h"
 
 
-// TODO: Continue here
+// TODO: May need more testing
 void Movegen::make_move(Move move, Board* board) {
     Bitboard from_to_bb = move.from ^ move.to;
     board->pieces[move.color][move.type] ^= from_to_bb;
 
-    if(move.type == ROOK || move.type == KING) { // Castle
+    // Check for capture
+    if(move.color) {
+        Bitboard capture_pos = move.to & board->get_all_black_pieces();
+        for(uint capture_type = 0; capture_type < 6; ++capture_type) {
+            if((capture_pos & board->pieces[!move.color][capture_type]) != 0) {
+                board->pieces[!move.color][capture_type] ^= move.to;
+                move.capture = true;
+                move.capture_type = capture_type;
+            }
+        }
+    }
+    
+    // Check for castle
+    if(move.castle) {
+        if(move.to == ((Bitboards::ROW_MASK[0] & Bitboards::COLUMN_MASK[1]))) // White left
+            board->pieces[move.color][ROOK] ^= (move.to >> 1) ^ (move.to << 1);
+        if(move.to == ((Bitboards::ROW_MASK[0] & Bitboards::COLUMN_MASK[6]))) // White right
+            board->pieces[move.color][ROOK] ^= (move.to << 1)^ (move.to >> 1);
+        if(move.to == ((Bitboards::ROW_MASK[7] & Bitboards::COLUMN_MASK[1]))) // Black left
+            board->pieces[move.color][ROOK] ^= (move.to >> 1) ^ (move.to << 1);
+        if(move.to == ((Bitboards::ROW_MASK[7] & Bitboards::COLUMN_MASK[6]))) // Black right
+            board->pieces[move.color][ROOK] ^= (move.to << 1) ^ (move.to >> 1);        
+    }
+
+    // Castle rights
+    if(move.type == ROOK || move.type == KING) {
         if(board->can_castle[move.color]) move.castle = true;
         board->can_castle[move.color] = false;
-    } 
+    }
+
     board->history.push(move);
 }
 
-//TODO: Unmake move
+//TODO: May need more testing
 void Movegen::unmake_move(Board* board) {
     Move move = board->history.top();
     Bitboard from_to_bb = move.from ^ move.to;
     board->pieces[move.color][move.type] ^= from_to_bb;
+
+    if(move.capture) board->pieces[!move.color][move.capture_type] ^= move.to; // Undo capture
     
-    if(move.castle) board->can_castle[move.color] = true; // Undo castle
+    // Undo castle
+    if(move.castle) {
+        board->can_castle[move.color] = true; 
+        if((move.to & Bitboards::COLUMN_MASK[1]) != 0) { // Left
+            board->pieces[move.color][ROOK] ^= (move.to >> 1) ^ (move.to << 1);
+        }
+        if((move.to & Bitboards::COLUMN_MASK[6]) != 0) { // Right
+            board->pieces[move.color][ROOK] ^= (move.to << 1) ^ (move.to >> 1);
+        }
+    }
 
     board->history.pop();
 }
@@ -36,12 +73,15 @@ std::vector<Bitboard> Movegen::seperate_bitboards(Bitboard const& bb) {
     return res;
 }
 
+// TODO: implement check checker to filter moves
+// If number of moves is 0 GAME OVER
 std::vector<Move> Movegen::get_moves_for(Bitboard from, bool color, uint type, Board* board) {
     std::vector<Move> moves;
     Move move;
     move.from = from;
     move.color = color;
     move.type = type;
+    move.castle = false;
     std::vector<Bitboard> to;
 
     switch (type)
@@ -69,8 +109,14 @@ std::vector<Move> Movegen::get_moves_for(Bitboard from, bool color, uint type, B
         break;
     }
 
+    // Check for castle
     for(auto t : to) {
         move.to = t;
+        if(type == KING && ((t & (Bitboards::COLUMN_MASK[1] | Bitboards::COLUMN_MASK[6])) != 0)) {
+            if(from == (Bitboards::KING_START & ((color) ? Bitboards::ALL_WHITE_START : Bitboards::ALL_BLACK_START))) {
+                move.castle = true;
+            }
+        }       
         moves.push_back(move);
     }
     return moves;
@@ -114,16 +160,15 @@ Bitboard Movegen::get_king_moves(bool color, Board* board) {
     Bitboard right_backward_diagonal_attack;
     Bitboard all_moves_possible;
 
-    // TODO: Castle
-    // Add flag if king or rook has moved
-    Bitboard left_castle;
-    Bitboard right_castle;
-    if (color) {
+    // TODO: Check if correct
+    Bitboard left_castle = 0;
+    Bitboard right_castle = 0;
+    if (board->can_castle[color] && color) {
         left_castle = (((board->pieces[color][KING] & (Bitboards::KING_START & Bitboards::ALL_WHITE_START)) >> 3) & 
             (board->pieces[color][ROOK] & (Bitboards::ROOK_START & Bitboards::ALL_WHITE_START)) << 1);
         right_castle = (((board->pieces[color][KING] & (Bitboards::KING_START & Bitboards::ALL_WHITE_START)) << 2) & 
             (board->pieces[color][ROOK] & (Bitboards::ROOK_START & Bitboards::ALL_WHITE_START)) >> 1);
-    } else {
+    } else if(board->can_castle[color] && !color){
         right_castle = (((board->pieces[color][KING] & (Bitboards::KING_START & Bitboards::ALL_BLACK_START)) >> 3) & 
             (board->pieces[color][ROOK] & (Bitboards::ROOK_START & Bitboards::ALL_BLACK_START)) << 1);
         left_castle = (((board->pieces[color][KING] & (Bitboards::KING_START & Bitboards::ALL_BLACK_START)) << 2) & 

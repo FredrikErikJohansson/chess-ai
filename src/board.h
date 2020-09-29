@@ -22,6 +22,7 @@ struct Move {
 	bool capture = false;
 	bool castle = false;
     uint type;
+	uint capture_type;
 };
 
 class Board {
