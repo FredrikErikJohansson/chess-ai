@@ -5,46 +5,46 @@
 
 
 // TODO: May need more testing
-void Movegen::make_move(Move& move, Board* board) {
+// Move has to be copy
+void Movegen::make_move(Move move, Board* board) {
     Bitboard from_to_bb = move.from ^ move.to;
     board->pieces[move.color][move.type] ^= from_to_bb;
     // Since there was a move avaiable the player is not i check
     board->is_checked[move.color] = false; 
 
     // Check for capture
-    if(move.color) {
-        Bitboard capture_pos = move.to & board->get_all_black_pieces();
-        for(uint capture_type = 0; capture_type < 6; ++capture_type) {
-            if((capture_pos & board->pieces[!move.color][capture_type]) != 0) {
-                board->pieces[!move.color][capture_type] ^= move.to;
-                move.capture = true;
-                move.capture_type = capture_type;
-            }
+    Bitboard capture_pos;
+    if(move.color) capture_pos = move.to & board->get_all_black_pieces();
+    else capture_pos = move.to & board->get_all_white_pieces();
+    
+    for(uint capture_type = 0; capture_type < 6; ++capture_type) {
+        if((capture_pos & board->pieces[!move.color][capture_type]) != 0) {
+            board->pieces[!move.color][capture_type] ^= move.to;
+            move.capture = true;
+            move.capture_type = capture_type;
         }
     }
-    
+
     // Check for castle
-    if(move.castle) {
-        if(move.to == ((Bitboards::ROW_MASK[0] & Bitboards::COLUMN_MASK[1]))) // White left
+    // TODO: Need testing
+    Bitboard rook_start = Bitboards::ROOK_START & ((move.color) ? Bitboards::ALL_WHITE_START : Bitboards::ALL_BLACK_START);
+    if(move.type == ROOK && (rook_start & board->pieces[move.color][ROOK]) == 0)
+    if(move.type == KING && board->can_castle[move.color]) {
+        if((move.to & (rook_start & Bitboards::COLUMN_MASK[1])) != 0) { // Left
             board->pieces[move.color][ROOK] ^= (move.to >> 1) ^ (move.to << 1);
-        if(move.to == ((Bitboards::ROW_MASK[0] & Bitboards::COLUMN_MASK[6]))) // White right
-            board->pieces[move.color][ROOK] ^= (move.to << 1)^ (move.to >> 1);
-        if(move.to == ((Bitboards::ROW_MASK[7] & Bitboards::COLUMN_MASK[1]))) // Black left
-            board->pieces[move.color][ROOK] ^= (move.to >> 1) ^ (move.to << 1);
-        if(move.to == ((Bitboards::ROW_MASK[7] & Bitboards::COLUMN_MASK[6]))) // Black right
-            board->pieces[move.color][ROOK] ^= (move.to << 1) ^ (move.to >> 1);        
+            move.castle = true;
+        }
+        if((move.to & (rook_start & Bitboards::COLUMN_MASK[6])) != 0) { // Right
+            board->pieces[move.color][ROOK] ^= (move.to << 1) ^ (move.to >> 1);
+            move.castle = true;
+        }
     }
+    if(move.type == KING) board->can_castle[move.color] = false;
+    if(move.type == ROOK && (rook_start & board->pieces[move.color][ROOK]) == 0) board->can_castle[move.color] = false;
 
     // Check for check
     if(move.check) {
-        std::cout << move.color << " is in check!" << std::endl;
         board->is_checked[!move.color] = true;
-    }
-
-    // Castle rights
-    if(move.type == ROOK || move.type == KING) {
-        if(board->can_castle[move.color]) move.castle = true;
-        board->can_castle[move.color] = false;
     }
 
     board->history.push(move);
@@ -57,16 +57,27 @@ void Movegen::unmake_move(Board* board) {
     board->pieces[move.color][move.type] ^= from_to_bb;
 
     if(move.capture) board->pieces[!move.color][move.capture_type] ^= move.to; // Undo capture
-    
+
+    // Check for castle
+    Bitboard rook_start = Bitboards::ROOK_START & ((move.color) ? Bitboards::ALL_WHITE_START : Bitboards::ALL_BLACK_START);
+    Bitboard king_start = Bitboards::KING_START & ((move.color) ? Bitboards::ALL_WHITE_START : Bitboards::ALL_BLACK_START);
+   
     // Undo castle
-    if(move.castle) {
-        board->can_castle[move.color] = true; 
+    // TODO: Need testing
+    if(move.castle && !board->can_castle[move.color]) {
         if((move.to & Bitboards::COLUMN_MASK[1]) != 0) { // Left
             board->pieces[move.color][ROOK] ^= (move.to >> 1) ^ (move.to << 1);
         }
         if((move.to & Bitboards::COLUMN_MASK[6]) != 0) { // Right
             board->pieces[move.color][ROOK] ^= (move.to << 1) ^ (move.to >> 1);
         }
+    }
+    if(move.type == KING && (king_start & move.from) > 0 && (rook_start & board->pieces[move.color][ROOK]) > 0) board->can_castle[move.color] = true; 
+    if(move.type == ROOK && (rook_start & move.from) > 0 && (king_start & board->pieces[move.color][KING]) > 0) board->can_castle[move.color] = true; 
+
+     // Undo check
+    if(move.check) {
+        board->is_checked[!move.color] = false;
     }
 
     board->history.pop();
@@ -81,7 +92,6 @@ std::vector<Bitboard> Movegen::seperate_bitboards(Bitboard const& bb) {
     return res;
 }
 
-// TODO: implement check checker to filter moves
 void Movegen::get_moves_for(Bitboard from, bool color, uint type, Board* board) {
     //std::vector<Move> moves;
     Move move;

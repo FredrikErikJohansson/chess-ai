@@ -15,7 +15,7 @@ int main() {
     //chessBoard.clear();
     //chessBoard.print();
 
-    for(int turn = 0; turn < 40; turn++) {
+    for(int turn = 0; turn < 1000; turn++) {
         Movegen moveGen = Movegen(&chessBoard);
         std::vector<Bitboard> white_pawn_bb_pos = moveGen.seperate_bitboards(chessBoard.pieces[WHITE][PAWN]);
         std::vector<Bitboard> white_rook_bb_pos = moveGen.seperate_bitboards(chessBoard.pieces[WHITE][ROOK]);
@@ -83,16 +83,26 @@ int main() {
         std::cout << "Black move count: " << chessBoard.moves[BLACK].size() << std::endl;
         std::random_device dev;
         std::mt19937 rng(dev());
-        std::uniform_int_distribution<std::mt19937::result_type> dist(0, chessBoard.moves[WHITE].size() - 1); // distribution in range [1, 6]
+        
+        bool tmp_color = false;
+        if(turn % 2 == 0) tmp_color = true;
+        std::uniform_int_distribution<std::mt19937::result_type> dist(0, chessBoard.moves[tmp_color].size() - 1); // distribution in range [1, 6]
         int rand_num = dist(rng);
 
-        moveGen.make_move(chessBoard.moves[WHITE][rand_num], &chessBoard); // First pawn do first move
-        std::cout << "Moved: " << chessBoard.moves[WHITE][rand_num].type << ", castle: " << chessBoard.moves[WHITE][rand_num].castle << std::endl;
+        if(chessBoard.moves[tmp_color].size() < 1) {
+            std::cout << tmp_color << " won!" << std::endl;
+            break;
+        }
+
+        moveGen.make_move(chessBoard.moves[tmp_color][rand_num], &chessBoard); // First pawn do first move
+        std::cout << "Moved: " << chessBoard.moves[tmp_color][rand_num].type << ", color " << tmp_color << " can castle: " << chessBoard.can_castle[tmp_color]<< std::endl;
         std::cout << "White_count: " << white_count << ", Black_count: " << black_count << std::endl;
+        if(tmp_color) std::cout << "WHITE:" << std::endl;
+        else std::cout << "BLACK:" << std::endl;
         std::cout << "From:" << std::endl;
-        chessBoard.print(chessBoard.moves[WHITE][rand_num].from);
+        chessBoard.print(chessBoard.moves[tmp_color][rand_num].from);
         std::cout << "To:" << std::endl;
-        chessBoard.print(chessBoard.moves[WHITE][rand_num].to);
+        chessBoard.print(chessBoard.moves[tmp_color][rand_num].to);
         chessBoard.print();
 
         std::cout << "Press any key to continue: " << std::endl;

@@ -11,7 +11,7 @@ public:
     Movegen() {};
 
     // Maybe remove board from argument (everywhere)
-    void make_move(Move&, Board*);
+    void make_move(Move, Board*);
     void unmake_move(Board*);
 
     // Get board index from bitboard
