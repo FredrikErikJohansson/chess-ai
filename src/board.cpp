@@ -81,7 +81,8 @@ void Board::print_visualization(Board const board) {
     }
     
     for (int row = 7; row>=0; row--) { 
-        std::cout << "+---+---+---+---+---+---+---+---+\n";
+        std::cout << "   +---+---+---+---+---+---+---+---+\n";
+        std::cout << " " << row+1 << " ";
         for (int col = 0; col<8; col++) {
             short index = row*8+col;
             std::cout << out_board[index];
@@ -91,7 +92,8 @@ void Board::print_visualization(Board const board) {
             else if (index+1!=8) std::cout << "";
         }
     }
-    std::cout << "|\n+---+---+---+---+---+---+---+---+\n";
+    std::cout << "|\n   +---+---+---+---+---+---+---+---+\n";
+    std::cout << "     A   B   C   D   E   F   G   H\n";
 }
 
 uint_fast16_t Board::find_board(bool color, Bitboard pos) {
