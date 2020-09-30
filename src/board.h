@@ -50,4 +50,5 @@ public:
 	bool can_castle[2] = {true, true};
 	bool is_checked[2] = {false, false};
 	std::array<std::vector<Move>, 2> moves;
+	//std::array<std::array<std::vector<Move>, 6>, 2> pos;
 };
