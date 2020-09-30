@@ -5,15 +5,7 @@
 
 int main() {
     Board chessBoard;
-    std::cout << 12*sizeof(Bitboard) << std::endl;;
     chessBoard.initialize();
-    //chessBoard.clear();
-    chessBoard.print();
-
-    //auto asd = Bitboards::ROW_MASK[0];
-    //chessBoard.print(asd);
-    //chessBoard.clear();
-    //chessBoard.print();
 
     for(int turn = 0; turn < 1000; turn++) {
         Movegen moveGen = Movegen(&chessBoard);
@@ -35,6 +27,8 @@ int main() {
         size_t black_count = black_pawn_bb_pos.size() + black_rook_bb_pos.size() + black_knight_bb_pos.size() + 
                             black_bishop_bb_pos.size() + black_queen_bb_pos.size() + black_king_bb_pos.size();
 
+        std::cout << "White_count: " << white_count << ", Black_count: " << black_count << std::endl;
+       
         // White moves
         for (auto p : white_pawn_bb_pos) {
             moveGen.get_moves_for(p, WHITE, PAWN, &chessBoard);
@@ -75,10 +69,6 @@ int main() {
             moveGen.get_moves_for(p, BLACK, KING, &chessBoard);
         }
 
-
-        // std::cout << "TEST: " << std::endl;
-        // chessBoard.print(moveGen.get_all_moves(WHITE, &chessBoard));
-
         std::cout << "White move count: " << chessBoard.moves[WHITE].size() << std::endl;
         std::cout << "Black move count: " << chessBoard.moves[BLACK].size() << std::endl;
         std::random_device dev;
@@ -94,16 +84,21 @@ int main() {
             break;
         }
 
+        if(black_king_bb_pos.size() < 1) {
+            std::cout << tmp_color << "White won!" << std::endl;
+            break;
+        }
+        if(white_king_bb_pos.size() < 1) {
+            std::cout << tmp_color << "Black won!" << std::endl;
+            break;
+        }
+
         moveGen.make_move(chessBoard.moves[tmp_color][rand_num], &chessBoard); // First pawn do first move
         std::cout << "Moved: " << chessBoard.moves[tmp_color][rand_num].type << ", color " << tmp_color << " can castle: " << chessBoard.can_castle[tmp_color]<< std::endl;
-        std::cout << "White_count: " << white_count << ", Black_count: " << black_count << std::endl;
+        
         if(tmp_color) std::cout << "WHITE:" << std::endl;
         else std::cout << "BLACK:" << std::endl;
-        std::cout << "From:" << std::endl;
-        chessBoard.print(chessBoard.moves[tmp_color][rand_num].from);
-        std::cout << "To:" << std::endl;
-        chessBoard.print(chessBoard.moves[tmp_color][rand_num].to);
-        chessBoard.print();
+        chessBoard.print_visualization(chessBoard);
 
         std::cout << "Press any key to continue: " << std::endl;
         chessBoard.moves[WHITE].clear();
@@ -113,17 +108,8 @@ int main() {
     }
     while(chessBoard.history.size() > 0) {
         Movegen moveGen = Movegen(&chessBoard);
-        std::cout << "Undid move number: " <<  chessBoard.history.size() << std::endl;
-        std::cout << "Moved " << chessBoard.history.top().type << std::endl;
-        std::cout << "From: " << std::endl;
-        chessBoard.print(chessBoard.history.top().to);
-        std::cout << "To: " << std::endl;
-        chessBoard.print(chessBoard.history.top().from);
         moveGen.unmake_move(&chessBoard);
-        chessBoard.print();
+        chessBoard.print_visualization(chessBoard);
         std::cin.get();
     }
-    // moveGen.unmake_move(&chessBoard);
-    // chessBoard.print();
-    //}
 }

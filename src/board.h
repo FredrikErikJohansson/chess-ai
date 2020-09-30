@@ -36,18 +36,9 @@ public:
     Bitboard get_all_black_pieces() const;
     Bitboard get_all_pieces() const;
 
-	// TODO: make a setter instead of changing to get value
-	//Bitboard& get_pieces(bool color, uint type) { return pieces[color][type]; }
-    //std::array<Bitboard, 6> get_white() { return pieces[0]; }
-    //std::array<Bitboard, 6> get_black() { return pieces[1]; }
-
-	//Bitboard get_enpessant(bool color) { return enpessant[color]; }
-	//bool get_castle(bool color) { return can_castle[color]; }
-
-	//void set_castle(bool color, bool can) { can_castle[color] = can; }
-
 	void print() const;
 	void print(Bitboard const&) const;
+	void print_visualization(Board const);
 	// short getRowFromChar(char letter);
 	// bool queryPiece(char column,short row, Bitboard board);
 

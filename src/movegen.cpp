@@ -26,17 +26,19 @@ void Movegen::make_move(Move move, Board* board) {
     }
 
     // Check for castle
-    // TODO: Need testing
     Bitboard rook_start = Bitboards::ROOK_START & ((move.color) ? Bitboards::ALL_WHITE_START : Bitboards::ALL_BLACK_START);
-    if(move.type == ROOK && (rook_start & board->pieces[move.color][ROOK]) == 0)
-    if(move.type == KING && board->can_castle[move.color]) {
-        if((move.to & (rook_start & Bitboards::COLUMN_MASK[1])) != 0) { // Left
-            board->pieces[move.color][ROOK] ^= (move.to >> 1) ^ (move.to << 1);
-            move.castle = true;
+    if(move.castle && (rook_start & board->pieces[move.color][ROOK]) != 0) {
+        if((move.to & ((rook_start << 1) & Bitboards::COLUMN_MASK[1])) != 0) { // Left
+            board->pieces[move.color][ROOK] ^= (move.to << 1);
+            board->pieces[move.color][ROOK] ^= (move.to >> 1);
+            std::cout << "first";
+            board->can_castle[move.color] = false;
         }
-        if((move.to & (rook_start & Bitboards::COLUMN_MASK[6])) != 0) { // Right
-            board->pieces[move.color][ROOK] ^= (move.to << 1) ^ (move.to >> 1);
-            move.castle = true;
+        if((move.to & ((rook_start >> 1) & Bitboards::COLUMN_MASK[6])) != 0) { // Right
+            board->pieces[move.color][ROOK] ^= (move.to >> 1);
+            board->pieces[move.color][ROOK] ^= (move.to << 1);
+            board->can_castle[move.color] = false;
+            std::cout << "second";
         }
     }
     if(move.type == KING) board->can_castle[move.color] = false;
@@ -50,30 +52,27 @@ void Movegen::make_move(Move move, Board* board) {
     board->history.push(move);
 }
 
-//TODO: May need more testing
 void Movegen::unmake_move(Board* board) {
     Move move = board->history.top();
     Bitboard from_to_bb = move.from ^ move.to;
     board->pieces[move.color][move.type] ^= from_to_bb;
 
     if(move.capture) board->pieces[!move.color][move.capture_type] ^= move.to; // Undo capture
-
-    // Check for castle
-    Bitboard rook_start = Bitboards::ROOK_START & ((move.color) ? Bitboards::ALL_WHITE_START : Bitboards::ALL_BLACK_START);
-    Bitboard king_start = Bitboards::KING_START & ((move.color) ? Bitboards::ALL_WHITE_START : Bitboards::ALL_BLACK_START);
    
     // Undo castle
-    // TODO: Need testing
-    if(move.castle && !board->can_castle[move.color]) {
+    if(move.type == KING && move.castle) {
+        std::cout << "INNE";
         if((move.to & Bitboards::COLUMN_MASK[1]) != 0) { // Left
-            board->pieces[move.color][ROOK] ^= (move.to >> 1) ^ (move.to << 1);
+            board->pieces[move.color][ROOK] ^= (move.to << 1);
+            board->pieces[move.color][ROOK] ^= (move.to >> 1);
+            board->can_castle[move.color] = true; 
         }
         if((move.to & Bitboards::COLUMN_MASK[6]) != 0) { // Right
-            board->pieces[move.color][ROOK] ^= (move.to << 1) ^ (move.to >> 1);
+            board->pieces[move.color][ROOK] ^= (move.to >> 1);
+            board->pieces[move.color][ROOK] ^= (move.to << 1);
+            board->can_castle[move.color] = true; 
         }
     }
-    if(move.type == KING && (king_start & move.from) > 0 && (rook_start & board->pieces[move.color][ROOK]) > 0) board->can_castle[move.color] = true; 
-    if(move.type == ROOK && (rook_start & move.from) > 0 && (king_start & board->pieces[move.color][KING]) > 0) board->can_castle[move.color] = true; 
 
      // Undo check
     if(move.check) {
@@ -93,7 +92,6 @@ std::vector<Bitboard> Movegen::seperate_bitboards(Bitboard const& bb) {
 }
 
 void Movegen::get_moves_for(Bitboard from, bool color, uint type, Board* board) {
-    //std::vector<Move> moves;
     Move move;
     move.from = from;
     move.color = color;
@@ -180,7 +178,7 @@ Bitboard Movegen::get_king_moves(bool color, Board* board) {
     Bitboard right_backward_diagonal_attack;
     Bitboard all_moves_possible;
 
-    // TODO: Check if correct
+    // TODO: Test if correct
     Bitboard left_castle = 0;
     Bitboard right_castle = 0;
     if (board->can_castle[color] && color) {
@@ -336,7 +334,6 @@ Bitboard Movegen::get_queen_moves(Bitboard bb, bool color, Board* board) {
 //     }
 // }
 
-
  Bitboard Movegen::get_all_moves(bool color, Board* board) {
  	Bitboard total_moves = 0;
     for(auto move : board->moves[color]) {
@@ -346,12 +343,23 @@ Bitboard Movegen::get_queen_moves(Bitboard bb, bool color, Board* board) {
  	return total_moves;
  }
 
-//TODO: May need more testing
  bool Movegen::check(Move& move) {
+    bool prev_can_castle = board->can_castle[move.color];
     make_move(move, board);
 
+    // TODO: Need to check what the new moves are for the opponent
+
+    if(move.type == KING) {
+        board->can_castle[move.color] = prev_can_castle;
+    }
     // Self check
     if((this->get_all_moves(!move.color, board) & board->pieces[move.color][KING]) != 0) {
+        unmake_move(board);
+        return false;
+    }
+
+    // In check after move
+    if(board->is_checked[move.color]) {
         unmake_move(board);
         return false;
     }

@@ -36,7 +36,5 @@ public:
 
 private:
     Board* board;
-    // bool checkmate1(bool color, Bitboard);
-	// bool checkmate2(bool color, Board*);
 };
 
