@@ -68,6 +68,9 @@ int main() {
             moves.insert( moves.end(), tmp.begin(), tmp.end() );
         }
 
+        std::cout << "TEST: " << std::endl;
+        chessBoard.print(moveGen.get_all_moves(BLACK, &chessBoard));
+
         std::cout << "Length of moves: " << moves.size() << std::endl;
         std::random_device dev;
         std::mt19937 rng(dev());
@@ -82,6 +85,7 @@ int main() {
         std::cout << "To:" << std::endl;
         chessBoard.print(moves[rand_num].to);
         chessBoard.print();
+
         std::cout << "Press any key to continue: " << std::endl;
         moves.clear();
         white_pawn_bb_pos.clear();

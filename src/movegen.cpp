@@ -5,9 +5,11 @@
 
 
 // TODO: May need more testing
-void Movegen::make_move(Move move, Board* board) {
+void Movegen::make_move(Move& move, Board* board) {
     Bitboard from_to_bb = move.from ^ move.to;
     board->pieces[move.color][move.type] ^= from_to_bb;
+    // Since there was a move avaiable the player is not i check
+    board->is_checked[move.color] = false; 
 
     // Check for capture
     if(move.color) {
@@ -31,6 +33,12 @@ void Movegen::make_move(Move move, Board* board) {
             board->pieces[move.color][ROOK] ^= (move.to >> 1) ^ (move.to << 1);
         if(move.to == ((Bitboards::ROW_MASK[7] & Bitboards::COLUMN_MASK[6]))) // Black right
             board->pieces[move.color][ROOK] ^= (move.to << 1) ^ (move.to >> 1);        
+    }
+
+    // Check for check
+    if(move.check) {
+        std::cout << move.color << " is in check!" << std::endl;
+        board->is_checked[!move.color] = true;
     }
 
     // Castle rights
@@ -74,14 +82,12 @@ std::vector<Bitboard> Movegen::seperate_bitboards(Bitboard const& bb) {
 }
 
 // TODO: implement check checker to filter moves
-// If number of moves is 0 GAME OVER
 std::vector<Move> Movegen::get_moves_for(Bitboard from, bool color, uint type, Board* board) {
     std::vector<Move> moves;
     Move move;
     move.from = from;
     move.color = color;
     move.type = type;
-    move.castle = false;
     std::vector<Bitboard> to;
 
     switch (type)
@@ -105,7 +111,7 @@ std::vector<Move> Movegen::get_moves_for(Bitboard from, bool color, uint type, B
         to = seperate_bitboards(get_king_moves(color, board));
         break;
     default:
-        std::cerr << "Error: unknown type " << type << std::endl;
+        std::cout << "Error: unknown type " << type << std::endl;
         break;
     }
 
@@ -116,9 +122,15 @@ std::vector<Move> Movegen::get_moves_for(Bitboard from, bool color, uint type, B
             if(from == (Bitboards::KING_START & ((color) ? Bitboards::ALL_WHITE_START : Bitboards::ALL_BLACK_START))) {
                 move.castle = true;
             }
-        }       
-        moves.push_back(move);
+        }
+
+        // Check for self check and opponent check
+        if(this->check(move)) {
+            moves.push_back(move);
+        }
+
     }
+
     return moves;
 }
 
@@ -346,4 +358,25 @@ Bitboard Movegen::get_queen_moves(Bitboard bb, bool color, Board* board) {
   		}
   	}
  	return total_moves;
+ }
+
+ bool Movegen::check(Move& move) {
+    make_move(move, board);
+
+    // Self check
+    if((this->get_all_moves(move.color, board) & board->pieces[move.color][KING]) != 0) {
+        unmake_move(board);
+        
+        return false;
+    }
+
+    // Opponent check
+    if((this->get_all_moves(move.color, board) & board->pieces[!move.color][KING]) != 0) {
+        unmake_move(board);
+        move.check = true;
+        return true;
+    } 
+
+    unmake_move(board);
+    return true;
  }

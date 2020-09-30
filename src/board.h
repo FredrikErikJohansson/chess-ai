@@ -21,6 +21,7 @@ struct Move {
     bool color;
 	bool capture = false;
 	bool castle = false;
+	bool check = false;
     uint type;
 	uint capture_type;
 };
@@ -54,5 +55,7 @@ public:
 	std::stack<Move> history;
 	std::array<std::array<Bitboard, 6>, 2> pieces = {};
 	std::array<Bitboard, 2> enpessant = {};
-	bool can_castle[2] = {true, true};	
+	bool can_castle[2] = {true, true};
+	bool is_checked[2] = {false, false};
+	//std::vector<Move> moves;
 };

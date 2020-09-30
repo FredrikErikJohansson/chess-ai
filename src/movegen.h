@@ -11,7 +11,7 @@ public:
     Movegen() {};
 
     // Maybe remove board from argument (everywhere)
-    void make_move(Move, Board*);
+    void make_move(Move&, Board*);
     void unmake_move(Board*);
 
     // Get board index from bitboard
@@ -28,7 +28,7 @@ public:
     Bitboard get_king_moves(bool color, Board*);
     Bitboard get_all_moves(bool color, Board*);
 
-    // bool check(bool, Board*);
+    bool check(Move&);
     // bool checkmate(bool color, Board*);
 
     // bool isValidMove(uint_fast16_t userMove);
