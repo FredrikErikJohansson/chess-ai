@@ -64,24 +64,24 @@ void Board::print_visualization(Board const board) {
     std::cout << "Current Board:\n";
     std::string out_board[64];
     for (int i=0; i<64; i++) {
-        if      ((board.pieces[0][0] >> i) & 0b1) out_board[i]="| P ";
-        else if ((board.pieces[0][1] >> i) & 0b1) out_board[i]="| R ";
-        else if ((board.pieces[0][2] >> i) & 0b1) out_board[i]="| N ";
-        else if ((board.pieces[0][3] >> i) & 0b1) out_board[i]="| B ";
-        else if ((board.pieces[0][4] >> i) & 0b1) out_board[i]="| Q ";
-        else if ((board.pieces[0][5] >> i) & 0b1) out_board[i]="| K ";
+        if      ((board.pieces[0][0] >> i) & 0b1) out_board[i]="| ♙ ";
+        else if ((board.pieces[0][1] >> i) & 0b1) out_board[i]="| ♖ ";
+        else if ((board.pieces[0][2] >> i) & 0b1) out_board[i]="| ♘ ";
+        else if ((board.pieces[0][3] >> i) & 0b1) out_board[i]="| ♗ ";
+        else if ((board.pieces[0][4] >> i) & 0b1) out_board[i]="| ♕ ";
+        else if ((board.pieces[0][5] >> i) & 0b1) out_board[i]="| ♔ ";
 
-        else if ((board.pieces[1][0] >> i) & 0b1) out_board[i]="| p ";
-        else if ((board.pieces[1][1] >> i) & 0b1) out_board[i]="| r ";
-        else if ((board.pieces[1][2] >> i) & 0b1) out_board[i]="| n ";
-        else if ((board.pieces[1][3] >> i) & 0b1) out_board[i]="| b ";
-        else if ((board.pieces[1][4] >> i) & 0b1) out_board[i]="| q ";
-        else if ((board.pieces[1][5] >> i) & 0b1) out_board[i]="| k ";
+        else if ((board.pieces[1][0] >> i) & 0b1) out_board[i]="| ♟ ";
+        else if ((board.pieces[1][1] >> i) & 0b1) out_board[i]="| ♜ ";
+        else if ((board.pieces[1][2] >> i) & 0b1) out_board[i]="| ♞ ";
+        else if ((board.pieces[1][3] >> i) & 0b1) out_board[i]="| ♝ ";
+        else if ((board.pieces[1][4] >> i) & 0b1) out_board[i]="| ♛ ";
+        else if ((board.pieces[1][5] >> i) & 0b1) out_board[i]="| ♚ ";
         else out_board[i]="|   ";
     }
     
     for (int row = 7; row>=0; row--) { 
-        std::cout << "---------------------------------\n";
+        std::cout << "+---+---+---+---+---+---+---+---+\n";
         for (int col = 0; col<8; col++) {
             short index = row*8+col;
             std::cout << out_board[index];
@@ -91,7 +91,7 @@ void Board::print_visualization(Board const board) {
             else if (index+1!=8) std::cout << "";
         }
     }
-    std::cout << "|\n---------------------------------\n";
+    std::cout << "|\n+---+---+---+---+---+---+---+---+\n";
 }
 
 uint_fast16_t Board::find_board(bool color, Bitboard pos) {
