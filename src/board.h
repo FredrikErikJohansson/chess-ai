@@ -3,6 +3,7 @@
 #include <iostream>
 #include <array>
 #include <stack>
+#include <vector>
 
 #include "bitboards.h"
 
@@ -57,5 +58,5 @@ public:
 	std::array<Bitboard, 2> enpessant = {};
 	bool can_castle[2] = {true, true};
 	bool is_checked[2] = {false, false};
-	//std::vector<Move> moves;
+	std::array<std::vector<Move>, 2> moves;
 };

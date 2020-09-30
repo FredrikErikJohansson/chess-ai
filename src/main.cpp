@@ -35,72 +35,69 @@ int main() {
         size_t black_count = black_pawn_bb_pos.size() + black_rook_bb_pos.size() + black_knight_bb_pos.size() + 
                             black_bishop_bb_pos.size() + black_queen_bb_pos.size() + black_king_bb_pos.size();
 
-        std::vector<Move> moves;
+        // White moves
         for (auto p : white_pawn_bb_pos) {
-            std::vector<Move> tmp;
-            tmp = moveGen.get_moves_for(p, WHITE, PAWN, &chessBoard);
-            moves.insert( moves.end(), tmp.begin(), tmp.end() );
+            moveGen.get_moves_for(p, WHITE, PAWN, &chessBoard);
         }
         for (auto p : white_rook_bb_pos) {
-            std::vector<Move> tmp;
-            tmp = moveGen.get_moves_for(p, WHITE, ROOK, &chessBoard);
-            moves.insert( moves.end(), tmp.begin(), tmp.end() );
+            moveGen.get_moves_for(p, WHITE, ROOK, &chessBoard);
         }
         for (auto p : white_knight_bb_pos) {
-            std::vector<Move> tmp;
-            tmp = moveGen.get_moves_for(p, WHITE, KNIGHT, &chessBoard);
-            moves.insert( moves.end(), tmp.begin(), tmp.end() );
+            moveGen.get_moves_for(p, WHITE, KNIGHT, &chessBoard);
         }
         for (auto p : white_bishop_bb_pos) {
-            std::vector<Move> tmp;
-            tmp = moveGen.get_moves_for(p, WHITE, BISHOP, &chessBoard);
-            moves.insert( moves.end(), tmp.begin(), tmp.end() );
+            moveGen.get_moves_for(p, WHITE, BISHOP, &chessBoard);
         }
         for (auto p : white_queen_bb_pos) {
-            std::vector<Move> tmp;
-            tmp = moveGen.get_moves_for(p, WHITE, QUEEN, &chessBoard);
-            moves.insert( moves.end(), tmp.begin(), tmp.end() );
+            moveGen.get_moves_for(p, WHITE, QUEEN, &chessBoard);
         }
-
         for (auto p : white_king_bb_pos) {
-            std::vector<Move> tmp;
-            tmp = moveGen.get_moves_for(p, WHITE, KING, &chessBoard);
-            moves.insert( moves.end(), tmp.begin(), tmp.end() );
+            moveGen.get_moves_for(p, WHITE, KING, &chessBoard);
         }
 
-        std::cout << "TEST: " << std::endl;
-        chessBoard.print(moveGen.get_all_moves(BLACK, &chessBoard));
+        // Black moves
+        for (auto p : black_pawn_bb_pos) {
+            moveGen.get_moves_for(p, BLACK, PAWN, &chessBoard);
+        }
+        for (auto p : black_rook_bb_pos) {
+            moveGen.get_moves_for(p, BLACK, ROOK, &chessBoard);
+        }
+        for (auto p : black_knight_bb_pos) {
+            moveGen.get_moves_for(p, BLACK, KNIGHT, &chessBoard);
+        }
+        for (auto p : black_bishop_bb_pos) {
+            moveGen.get_moves_for(p, BLACK, BISHOP, &chessBoard);
+        }
+        for (auto p : black_queen_bb_pos) {
+            moveGen.get_moves_for(p, BLACK, QUEEN, &chessBoard);
+        }
+        for (auto p : black_king_bb_pos) {
+            moveGen.get_moves_for(p, BLACK, KING, &chessBoard);
+        }
 
-        std::cout << "Length of moves: " << moves.size() << std::endl;
+
+        // std::cout << "TEST: " << std::endl;
+        // chessBoard.print(moveGen.get_all_moves(WHITE, &chessBoard));
+
+        std::cout << "White move count: " << chessBoard.moves[WHITE].size() << std::endl;
+        std::cout << "Black move count: " << chessBoard.moves[BLACK].size() << std::endl;
         std::random_device dev;
         std::mt19937 rng(dev());
-        std::uniform_int_distribution<std::mt19937::result_type> dist(0, moves.size() - 1); // distribution in range [1, 6]
+        std::uniform_int_distribution<std::mt19937::result_type> dist(0, chessBoard.moves[WHITE].size() - 1); // distribution in range [1, 6]
         int rand_num = dist(rng);
 
-        moveGen.make_move(moves[rand_num], &chessBoard); // First pawn do first move
-        std::cout << "Moved: " << moves[rand_num].type << ", castle: " << moves[rand_num].castle << std::endl;
+        moveGen.make_move(chessBoard.moves[WHITE][rand_num], &chessBoard); // First pawn do first move
+        std::cout << "Moved: " << chessBoard.moves[WHITE][rand_num].type << ", castle: " << chessBoard.moves[WHITE][rand_num].castle << std::endl;
         std::cout << "White_count: " << white_count << ", Black_count: " << black_count << std::endl;
         std::cout << "From:" << std::endl;
-        chessBoard.print(moves[rand_num].from);
+        chessBoard.print(chessBoard.moves[WHITE][rand_num].from);
         std::cout << "To:" << std::endl;
-        chessBoard.print(moves[rand_num].to);
+        chessBoard.print(chessBoard.moves[WHITE][rand_num].to);
         chessBoard.print();
 
         std::cout << "Press any key to continue: " << std::endl;
-        moves.clear();
-        white_pawn_bb_pos.clear();
-        white_rook_bb_pos.clear();
-        white_knight_bb_pos.clear();
-        white_bishop_bb_pos.clear();
-        white_queen_bb_pos.clear();
-        white_king_bb_pos.clear();
-        black_pawn_bb_pos.clear();
-        black_rook_bb_pos.clear();
-        black_knight_bb_pos.clear();
-        black_bishop_bb_pos.clear();
-        black_queen_bb_pos.clear();
-        black_king_bb_pos.clear();
-
+        chessBoard.moves[WHITE].clear();
+        chessBoard.moves[BLACK].clear();
         std::cin.get();
 
     }

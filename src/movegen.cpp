@@ -82,8 +82,8 @@ std::vector<Bitboard> Movegen::seperate_bitboards(Bitboard const& bb) {
 }
 
 // TODO: implement check checker to filter moves
-std::vector<Move> Movegen::get_moves_for(Bitboard from, bool color, uint type, Board* board) {
-    std::vector<Move> moves;
+void Movegen::get_moves_for(Bitboard from, bool color, uint type, Board* board) {
+    //std::vector<Move> moves;
     Move move;
     move.from = from;
     move.color = color;
@@ -126,12 +126,10 @@ std::vector<Move> Movegen::get_moves_for(Bitboard from, bool color, uint type, B
 
         // Check for self check and opponent check
         if(this->check(move)) {
-            moves.push_back(move);
+            board->moves[move.color].push_back(move);
         }
 
     }
-
-    return moves;
 }
 
 Bitboard Movegen::get_bishop_moves(Bitboard bb, bool color, Board* board) {
@@ -331,42 +329,20 @@ Bitboard Movegen::get_queen_moves(Bitboard bb, bool color, Board* board) {
 
  Bitboard Movegen::get_all_moves(bool color, Board* board) {
  	Bitboard total_moves = 0;
- 	int piece;
- 	uint_fast16_t pos;
- 	for (pos = 0; pos < 64; pos++) {
- 		piece = board->find_board(color, static_cast<Bitboard>(1) << pos);
- 		if (piece >= 0) {
- 			switch (piece) {
- 			case 0:
- 				total_moves |= this->get_pawn_moves(pos, color, board);
- 				break;
- 			case 1:
- 				total_moves |= this->get_rook_moves(pos, color, board);
- 				break;
- 			case 2:
- 				total_moves |= this->get_knight_moves(pos, color, board);
- 				break;
- 			case 3:
- 				total_moves |= this->get_bishop_moves(pos, color, board);
- 				break;
- 			case 4:
- 				total_moves |= this->get_queen_moves(pos, color, board);
-  				break;
-  			case 5:
-  				total_moves |= this->get_king_moves(color, board);
-  			}
-  		}
-  	}
+    for(auto move : board->moves[color]) {
+        total_moves |= move.to;
+    }
+    
  	return total_moves;
  }
 
+//TODO: May need more testing
  bool Movegen::check(Move& move) {
     make_move(move, board);
 
     // Self check
-    if((this->get_all_moves(move.color, board) & board->pieces[move.color][KING]) != 0) {
+    if((this->get_all_moves(!move.color, board) & board->pieces[move.color][KING]) != 0) {
         unmake_move(board);
-        
         return false;
     }
 
