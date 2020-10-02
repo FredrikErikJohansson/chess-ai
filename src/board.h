@@ -23,6 +23,7 @@ struct Move {
 	bool capture = false;
 	bool castle = false;
 	bool check = false;
+	bool promotion = false;
     uint type;
 	uint capture_type;
 };

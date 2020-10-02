@@ -23,10 +23,12 @@ void Board::initialize() {
 void Board::clear() {
     pieces[WHITE].fill(0);
     pieces[BLACK].fill(0);
-    //pieces[WHITE][KING] = Bitboards::KING_START & Bitboards::ALL_WHITE_START;
-    //pieces[WHITE][ROOK] = Bitboards::ROOK_START & Bitboards::ALL_WHITE_START;
+    // pieces[BLACK][PAWN] = Bitboards::PAWN_START & Bitboards::ALL_BLACK_START;
+    // pieces[WHITE][PAWN] = Bitboards::PAWN_START & Bitboards::ALL_WHITE_START;
+    pieces[WHITE][KING] = Bitboards::KING_START & Bitboards::ALL_WHITE_START;
+    // pieces[WHITE][ROOK] = Bitboards::ROOK_START & Bitboards::ALL_WHITE_START;
     pieces[BLACK][KING] = Bitboards::KING_START & Bitboards::ALL_BLACK_START;
-    pieces[BLACK][ROOK] = Bitboards::ROOK_START & Bitboards::ALL_BLACK_START;
+    // pieces[BLACK][ROOK] = Bitboards::ROOK_START & Bitboards::ALL_BLACK_START;
 }
 
 Bitboard Board::get_all_white_pieces() const {

@@ -6,10 +6,12 @@
 int main() {
     Board chessBoard;
     chessBoard.initialize();
-    // chessBoard.clear();
+    //chessBoard.clear();
     // chessBoard.print();
     // chessBoard.pieces[BLACK][KING] = (chessBoard.pieces[BLACK][KING] >> 7);
     // chessBoard.print();
+    //chessBoard.print(Bitboards::KING_START << 9);
+    // chessBoard.print(Bitboards::COLUMN_CLEAR[0]);
 
 
     for(int turn = 0; turn < 1000; turn++) {
@@ -31,7 +33,7 @@ int main() {
         int rand_num = dist(rng);
 
         if(chessBoard.moves[tmp_color].size() < 1) {
-            std::cout << tmp_color << " won!" << std::endl;
+            std::cout << !tmp_color << " won!" << std::endl;
             break;
         }
 

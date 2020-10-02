@@ -25,6 +25,17 @@ void Movegen::make_move(Move move, Board* board) {
         }
     }
 
+    // TODO: Also consider knight promotion
+    // Check for promotion
+    if(move.type == PAWN) {
+        if((move.color && (move.to & Bitboards::ROW_MASK[7])) || (!move.color && (move.to & Bitboards::ROW_MASK[0]))) {   
+            board->pieces[move.color][PAWN] ^= move.to; // Remove pawn
+            board->pieces[move.color][QUEEN] ^= move.to; // Add queen
+            move.promotion = true;
+            move.type = QUEEN;
+        }
+    }
+
     // Check for castle
     Bitboard rook_start = Bitboards::ROOK_START & ((move.color) ? Bitboards::ALL_WHITE_START : Bitboards::ALL_BLACK_START);
     if(move.castle && (rook_start & board->pieces[move.color][ROOK]) != 0) {
@@ -56,6 +67,14 @@ void Movegen::unmake_move(Board* board) {
     board->pieces[move.color][move.type] ^= from_to_bb;
 
     if(move.capture) board->pieces[!move.color][move.capture_type] ^= move.to; // Undo capture
+
+    // Undo promotion
+    if(move.promotion) {
+        if((move.color && (move.to & Bitboards::ROW_MASK[7])) || (!move.color && (move.to & Bitboards::ROW_MASK[0]))) {   
+            board->pieces[move.color][PAWN] ^= move.from; // Add pawn
+            board->pieces[move.color][QUEEN] ^= move.from; // Remove queen
+        } 
+    }
    
     // Undo castle
     if(move.type == KING && move.castle) {
@@ -133,7 +152,6 @@ void Movegen::get_moves_for(Bitboard from, bool color, uint type, Board* board) 
         if(this->check(move)) {
             board->moves[move.color].push_back(move);
         }
-
     }
 }
 
@@ -190,14 +208,14 @@ Bitboard Movegen::get_king_moves(bool color, Board* board) {
             (board->pieces[color][ROOK] & (Bitboards::ROOK_START & Bitboards::ALL_BLACK_START)) >> 1);
     }
 
-    left_attack = ((Bitboards::COLUMN_CLEAR[0] & (board->pieces[color][KING]) >> 1));
-    right_attack = ((Bitboards::COLUMN_CLEAR[7] & (board->pieces[color][KING]) << 1));
+    left_attack = ((Bitboards::COLUMN_CLEAR[0] & board->pieces[color][KING]) >> 1);
+    right_attack = ((Bitboards::COLUMN_CLEAR[7] & board->pieces[color][KING]) << 1);
     forward_attack = (board->pieces[color][KING] << 8);
     backward_attack = (board->pieces[color][KING] >> 8);
-    left_forward_diagonal_attack = ((Bitboards::COLUMN_CLEAR[0] & (board->pieces[color][KING]) << 7));
-    right_forward_diagonal_attack = ((Bitboards::COLUMN_CLEAR[7] & (board->pieces[color][KING]) << 9));
-    left_backward_diagonal_attack = ((Bitboards::COLUMN_CLEAR[0] & (board->pieces[color][KING]) >> 9));
-    right_backward_diagonal_attack = ((Bitboards::COLUMN_CLEAR[7] & (board->pieces[color][KING]) >> 7));
+    left_forward_diagonal_attack = ((Bitboards::COLUMN_CLEAR[0] & board->pieces[color][KING]) << 7);
+    right_forward_diagonal_attack = ((Bitboards::COLUMN_CLEAR[7] & board->pieces[color][KING]) << 9);
+    left_backward_diagonal_attack = ((Bitboards::COLUMN_CLEAR[0] & board->pieces[color][KING]) >> 9);
+    right_backward_diagonal_attack = ((Bitboards::COLUMN_CLEAR[7] & board->pieces[color][KING]) >> 7);
     all_moves_possible = (left_attack | right_attack | forward_attack | 
                         backward_attack | left_forward_diagonal_attack | 
                         right_forward_diagonal_attack | left_backward_diagonal_attack | 
