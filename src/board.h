@@ -47,7 +47,7 @@ public:
 
 	std::stack<Move> history;
 	std::array<std::array<Bitboard, 6>, 2> pieces = {};
-	std::array<Bitboard, 2> enpessant = {};
+	std::array<Bitboard, 2> enpessant = {0, 0};
 	bool can_castle[2] = {true, true};
 	bool is_checked[2] = {false, false};
 	std::array<std::vector<Move>, 2> moves;

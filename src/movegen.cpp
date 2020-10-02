@@ -10,7 +10,7 @@ void Movegen::make_move(Move move, Board* board) {
     Bitboard from_to_bb = move.from ^ move.to;
     board->pieces[move.color][move.type] ^= from_to_bb;
     // Since there was a move avaiable the player is not in check
-    board->is_checked[move.color] = false; 
+    board->is_checked[move.color] = false; // TODO: Probably not correct
 
     // Check for capture
     Bitboard capture_pos;
@@ -37,21 +37,22 @@ void Movegen::make_move(Move move, Board* board) {
     }
 
     // Check for castle
-    Bitboard rook_start = Bitboards::ROOK_START & ((move.color) ? Bitboards::ALL_WHITE_START : Bitboards::ALL_BLACK_START);
-    if(move.castle && (rook_start & board->pieces[move.color][ROOK]) != 0) {
-        if((move.to & ((rook_start << 1) & Bitboards::COLUMN_MASK[1])) != 0) { // Left
-            board->pieces[move.color][ROOK] ^= (move.to << 1);
-            board->pieces[move.color][ROOK] ^= (move.to >> 1);
-            board->can_castle[move.color] = false;
-        }
-        if((move.to & ((rook_start >> 1) & Bitboards::COLUMN_MASK[6])) != 0) { // Right
-            board->pieces[move.color][ROOK] ^= (move.to >> 1);
-            board->pieces[move.color][ROOK] ^= (move.to << 1);
-            board->can_castle[move.color] = false;
-        }
-    }
+    // Bitboard rook_start = Bitboards::ROOK_START & ((move.color) ? Bitboards::ALL_WHITE_START : Bitboards::ALL_BLACK_START);
+    // if(move.castle && (rook_start & board->pieces[move.color][ROOK]) != 0) {
+    //     if((move.to & ((rook_start << 1) & Bitboards::COLUMN_MASK[1])) != 0) { // Left
+    //         board->pieces[move.color][ROOK] ^= (move.to << 1);
+    //         board->pieces[move.color][ROOK] ^= (move.to >> 1);
+    //         board->can_castle[move.color] = false;
+    //     }
+    //     if((move.to & ((rook_start >> 1) & Bitboards::COLUMN_MASK[6])) != 0) { // Right
+    //         board->pieces[move.color][ROOK] ^= (move.to >> 1);
+    //         board->pieces[move.color][ROOK] ^= (move.to << 1);
+    //         board->can_castle[move.color] = false;
+    //     }
+    // }
+    // TODO: Not correct -> this may lead to multiple castles
     if(move.type == KING) board->can_castle[move.color] = false;
-    if(move.type == ROOK && (rook_start & board->pieces[move.color][ROOK]) == 0) board->can_castle[move.color] = false;
+    // if(move.type == ROOK && (rook_start & board->pieces[move.color][ROOK]) == 0) board->can_castle[move.color] = false;
 
     // Check for check
     if(move.check) {
@@ -77,18 +78,18 @@ void Movegen::unmake_move(Board* board) {
     }
    
     // Undo castle
-    if(move.type == KING && move.castle) {
-        if((move.to & Bitboards::COLUMN_MASK[1]) != 0) { // Left
-            board->pieces[move.color][ROOK] ^= (move.to << 1);
-            board->pieces[move.color][ROOK] ^= (move.to >> 1);
-            board->can_castle[move.color] = true; 
-        }
-        if((move.to & Bitboards::COLUMN_MASK[6]) != 0) { // Right
-            board->pieces[move.color][ROOK] ^= (move.to >> 1);
-            board->pieces[move.color][ROOK] ^= (move.to << 1);
-            board->can_castle[move.color] = true; 
-        }
-    }
+    // if(move.type == KING && move.castle) {
+    //     if((move.to & Bitboards::COLUMN_MASK[1]) != 0) { // Left
+    //         board->pieces[move.color][ROOK] ^= (move.to << 1);
+    //         board->pieces[move.color][ROOK] ^= (move.to >> 1);
+    //         board->can_castle[move.color] = true; 
+    //     }
+    //     if((move.to & Bitboards::COLUMN_MASK[6]) != 0) { // Right
+    //         board->pieces[move.color][ROOK] ^= (move.to >> 1);
+    //         board->pieces[move.color][ROOK] ^= (move.to << 1);
+    //         board->can_castle[move.color] = true; 
+    //     }
+    // }
 
      // Undo check
     if(move.check) {
@@ -196,16 +197,26 @@ Bitboard Movegen::get_king_moves(bool color, Board* board) {
     // TODO: Test if correct
     Bitboard left_castle = 0;
     Bitboard right_castle = 0;
+    Bitboard left_columns = (Bitboards::COLUMN_MASK[1] | Bitboards::COLUMN_MASK[2] | Bitboards::COLUMN_MASK[3]);
+    Bitboard right_columns = (Bitboards::COLUMN_MASK[5] | Bitboards::COLUMN_MASK[6]);
     if (board->can_castle[color] && color) {
-        left_castle = (((board->pieces[color][KING] & (Bitboards::KING_START & Bitboards::ALL_WHITE_START)) >> 3) & 
-            (board->pieces[color][ROOK] & (Bitboards::ROOK_START & Bitboards::ALL_WHITE_START)) << 1);
-        right_castle = (((board->pieces[color][KING] & (Bitboards::KING_START & Bitboards::ALL_WHITE_START)) << 2) & 
-            (board->pieces[color][ROOK] & (Bitboards::ROOK_START & Bitboards::ALL_WHITE_START)) >> 1);
+        if(((Bitboards::ROW_MASK[0] & left_columns) & board->get_all_white_pieces()) == 0) {
+            left_castle = (((board->pieces[color][KING] & (Bitboards::KING_START & Bitboards::ALL_WHITE_START)) >> 3) & 
+                (board->pieces[color][ROOK] & (Bitboards::ROOK_START & Bitboards::ALL_WHITE_START)) << 1);
+        }
+        if(((Bitboards::ROW_MASK[0] & right_columns) & board->get_all_white_pieces()) == 0) {
+            right_castle = (((board->pieces[color][KING] & (Bitboards::KING_START & Bitboards::ALL_WHITE_START)) << 2) & 
+                (board->pieces[color][ROOK] & (Bitboards::ROOK_START & Bitboards::ALL_WHITE_START)) >> 1);
+        }
     } else if(board->can_castle[color] && !color){
-        right_castle = (((board->pieces[color][KING] & (Bitboards::KING_START & Bitboards::ALL_BLACK_START)) >> 3) & 
-            (board->pieces[color][ROOK] & (Bitboards::ROOK_START & Bitboards::ALL_BLACK_START)) << 1);
-        left_castle = (((board->pieces[color][KING] & (Bitboards::KING_START & Bitboards::ALL_BLACK_START)) << 2) & 
-            (board->pieces[color][ROOK] & (Bitboards::ROOK_START & Bitboards::ALL_BLACK_START)) >> 1);
+        if(((Bitboards::ROW_MASK[7] & right_columns) & board->get_all_black_pieces()) == 0) {
+            right_castle = (((board->pieces[color][KING] & (Bitboards::KING_START & Bitboards::ALL_BLACK_START)) >> 3) & 
+                (board->pieces[color][ROOK] & (Bitboards::ROOK_START & Bitboards::ALL_BLACK_START)) << 1);
+        }
+        if(((Bitboards::ROW_MASK[7] & left_columns) & board->get_all_black_pieces()) == 0) {
+            left_castle = (((board->pieces[color][KING] & (Bitboards::KING_START & Bitboards::ALL_BLACK_START)) << 2) & 
+                (board->pieces[color][ROOK] & (Bitboards::ROOK_START & Bitboards::ALL_BLACK_START)) >> 1);
+        }
     }
 
     left_attack = ((Bitboards::COLUMN_CLEAR[0] & board->pieces[color][KING]) >> 1);
@@ -422,12 +433,14 @@ Bitboard Movegen::get_queen_moves(Bitboard bb, bool color, Board* board) {
     Bitboard xray_knights = this->get_knight_moves(king, color, board);
     Bitboard xray_queen = this->get_queen_moves(king, color, board);
     Bitboard xray_king = this->get_king_moves(color, board);
+    Bitboard xray_pawn = this->get_pawn_moves(king, color, board);
 
     return ((board->pieces[!color][ROOK] & xray_rooks)
         | (board->pieces[!color][BISHOP] & xray_bishops)
         | (board->pieces[!color][KNIGHT] & xray_knights)
         | (board->pieces[!color][QUEEN] & xray_queen)
-        | (board->pieces[!color][KING] & xray_king));
+        | (board->pieces[!color][KING] & xray_king)
+        | (board->pieces[!color][PAWN] & xray_pawn));
 }
 
  bool Movegen::check(Move& move) {
@@ -436,17 +449,16 @@ Bitboard Movegen::get_queen_moves(Bitboard bb, bool color, Board* board) {
 
     if(move.type == KING) {
         board->can_castle[move.color] = prev_can_castle;
-    
         // Check opponent pawns
         if(move.color) {
-            if(((move.to << 9) & board->pieces[!move.color][PAWN]) != 0 ||
-                ((move.to << 7) & board->pieces[!move.color][PAWN]) != 0) {
+            if(((move.to << 9) & board->pieces[BLACK][PAWN]) != 0 ||
+                ((move.to << 7) & board->pieces[BLACK][PAWN]) != 0) {
                 unmake_move(board);
                 return false;
             }
         } else {
-            if(((move.to >> 9) & board->pieces[!move.color][PAWN]) != 0 ||
-                ((move.to >> 7) & board->pieces[!move.color][PAWN]) != 0) {
+            if(((move.to >> 9) & board->pieces[WHITE][PAWN]) != 0 ||
+                ((move.to >> 7) & board->pieces[WHITE][PAWN]) != 0) {
                 unmake_move(board);
                 return false;
             }
