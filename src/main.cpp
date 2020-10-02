@@ -51,23 +51,31 @@ int main() {
         }
         int depth = 5;
         int score = INT32_MIN;
-        int tmp_score = 0;
+        //int tmp_score = 0;
         int counter = 0;
         int move_idx = 0;
         int iterations = 0;
+        auto root_moves = chessBoard.moves[tmp_color].size();
+        int i;
         if(tmp_color) {
-            for(auto move : chessBoard.moves[tmp_color]) {
-                //std::cout << chessBoard.moves[tmp_color].size() << std::endl;
-                moveGen.make_move(move, &chessBoard);
-                moveGen.calculate_all_moves();
-                tmp_score = search.alpha_beta_max(INT32_MIN, INT32_MAX, depth-1, iterations);
-                moveGen.unmake_move(&chessBoard);
-                moveGen.calculate_all_moves();
+            #pragma omp parallel// for 
+            for(i = 0; i < root_moves; i++) {
+                Board tmp_board(chessBoard);
+                Movegen tmp_gen = Movegen(&tmp_board);
+                Search tmp_search = Search(&tmp_board, &tmp_gen);
+                tmp_gen.make_move(chessBoard.moves[tmp_color][i], &tmp_board);
+                tmp_gen.calculate_all_moves();
+
+                int tmp_score = tmp_search.alpha_beta_max(INT32_MIN, INT32_MAX, depth-1, iterations);
+
+                tmp_gen.unmake_move(&tmp_board);
+                tmp_gen.calculate_all_moves();
+
+                #pragma omp critical
                 if(score < tmp_score) {
                     score = tmp_score;
-                    move_idx = counter;
+                    move_idx = i;
                 }
-                counter++;
             }
             //std::cout << "SCORE FOR WHITE: " << score << std::endl;
         }

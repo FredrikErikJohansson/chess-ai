@@ -30,6 +30,15 @@ struct Move {
 
 class Board {
 public:
+
+	Board(Board& board) { 
+		this->history = board.history;
+		this->pieces = board.pieces;
+		this->enpessant = board.enpessant;
+		this->moves = board.moves;
+	}
+    Board() {};
+
 	void initialize();
 	void clear();
 	

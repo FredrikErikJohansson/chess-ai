@@ -1,7 +1,7 @@
 SRC := ./src
 SRCS := $(wildcard $(SRC)/*.cpp)
 CXX = clang++
-CXXFLAGS := -O3 -Wall -Wextra -MMD
+CXXFLAGS := -O3 -Wall -Wextra -MMD -fopenmp
 
 all: chess
 
