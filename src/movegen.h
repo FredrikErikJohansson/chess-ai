@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <cmath>
+#include <algorithm>
 
 #include "bitboards.h"
 #include "board.h"
@@ -11,7 +12,7 @@ public:
     Movegen() {};
 
     // Maybe remove board from argument (everywhere)
-    void make_move(Move, Board*);
+    void make_move(Move, Board*, bool from_check = false);
     void unmake_move(Board*);
 
     // Get board index from bitboard
@@ -28,7 +29,7 @@ public:
     Bitboard get_king_moves(bool color, Board*);
     Bitboard get_all_moves(bool color, Board*);
 
-    void calculate_all_moves(bool color);
+    void calculate_all_moves();
     Bitboard attacks_to_king(Bitboard bb, bool color);
 
     bool check(Move&);

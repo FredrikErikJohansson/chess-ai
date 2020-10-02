@@ -19,8 +19,7 @@ int main() {
     for(int turn = 0; turn < 1000; turn++) {
 
         
-        moveGen.calculate_all_moves(WHITE); 
-        moveGen.calculate_all_moves(BLACK);  
+        moveGen.calculate_all_moves(); 
 
         //chessBoard.print(moveGen.get_all_moves(WHITE, &chessBoard));
 
@@ -50,7 +49,7 @@ int main() {
             std::cout << !tmp_color << " won!" << std::endl;
             break;;
         }
-        int depth = 3;
+        int depth = 5;
         int score = INT32_MIN;
         int tmp_score = 0;
         int counter = 0;
@@ -58,13 +57,12 @@ int main() {
         int iterations = 0;
         if(tmp_color) {
             for(auto move : chessBoard.moves[tmp_color]) {
+                //std::cout << chessBoard.moves[tmp_color].size() << std::endl;
                 moveGen.make_move(move, &chessBoard);
-                moveGen.calculate_all_moves(WHITE);
-                moveGen.calculate_all_moves(BLACK);
-                tmp_score = search.alpha_beta_max(INT32_MIN, INT32_MAX, depth, iterations);
+                moveGen.calculate_all_moves();
+                tmp_score = search.alpha_beta_max(INT32_MIN, INT32_MAX, depth-1, iterations);
                 moveGen.unmake_move(&chessBoard);
-                moveGen.calculate_all_moves(WHITE);
-                moveGen.calculate_all_moves(BLACK);
+                moveGen.calculate_all_moves();
                 if(score < tmp_score) {
                     score = tmp_score;
                     move_idx = counter;

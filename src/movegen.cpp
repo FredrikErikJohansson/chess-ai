@@ -6,58 +6,71 @@
 
 // TODO: May need more testing
 // Move has to be copy
-void Movegen::make_move(Move move, Board* board) {
+void Movegen::make_move(Move move, Board* board, bool from_check) {
     Bitboard from_to_bb = move.from ^ move.to;
     board->pieces[move.color][move.type] ^= from_to_bb;
     // Since there was a move avaiable the player is not in check
     board->is_checked[move.color] = false; // TODO: Probably not correct
 
     // Check for capture
-    Bitboard capture_pos;
-    if(move.color) capture_pos = move.to & board->get_all_black_pieces();
-    else capture_pos = move.to & board->get_all_white_pieces();
+    Bitboard capture_pos = 0;
+    if(move.color == WHITE) capture_pos = move.to & board->get_all_black_pieces();
+    else if(move.color == BLACK) capture_pos = move.to & board->get_all_white_pieces();
     
-    for(uint capture_type = 0; capture_type < 6; ++capture_type) {
-        if((capture_pos & board->pieces[!move.color][capture_type]) != 0) {
-            board->pieces[!move.color][capture_type] ^= move.to;
-            move.capture = true;
-            move.capture_type = capture_type;
+    
+    if(capture_pos != 0 && !from_check) {
+        for(uint capture_type = 0; capture_type < 6; ++capture_type) {
+            if(move.color == WHITE) {
+                if((capture_pos & board->pieces[BLACK][capture_type]) != 0) {
+                    board->pieces[BLACK][capture_type] ^= move.to;
+                    move.capture = true;
+                    move.capture_type = capture_type;
+                }
+
+            }
+            if(move.color == BLACK) {
+                if((capture_pos & board->pieces[WHITE][capture_type]) != 0) {
+                    board->pieces[WHITE][capture_type] ^= move.to;
+                    move.capture = true;
+                    move.capture_type = capture_type;
+                }
+            }
         }
     }
 
-    // TODO: Also consider knight promotion
-    // Check for promotion
-    if(move.type == PAWN) {
-        if((move.color && (move.to & Bitboards::ROW_MASK[7])) || (!move.color && (move.to & Bitboards::ROW_MASK[0]))) {   
-            board->pieces[move.color][PAWN] ^= move.to; // Remove pawn
-            board->pieces[move.color][QUEEN] ^= move.to; // Add queen
-            move.promotion = true;
-            move.type = QUEEN;
-        }
-    }
-
-    // Check for castle
-    // Bitboard rook_start = Bitboards::ROOK_START & ((move.color) ? Bitboards::ALL_WHITE_START : Bitboards::ALL_BLACK_START);
-    // if(move.castle && (rook_start & board->pieces[move.color][ROOK]) != 0) {
-    //     if((move.to & ((rook_start << 1) & Bitboards::COLUMN_MASK[1])) != 0) { // Left
-    //         board->pieces[move.color][ROOK] ^= (move.to << 1);
-    //         board->pieces[move.color][ROOK] ^= (move.to >> 1);
-    //         board->can_castle[move.color] = false;
-    //     }
-    //     if((move.to & ((rook_start >> 1) & Bitboards::COLUMN_MASK[6])) != 0) { // Right
-    //         board->pieces[move.color][ROOK] ^= (move.to >> 1);
-    //         board->pieces[move.color][ROOK] ^= (move.to << 1);
-    //         board->can_castle[move.color] = false;
+    // // TODO: Also consider knight promotion
+    // // Check for promotion
+    // if(move.type == PAWN) {
+    //     if((move.color && (move.to & Bitboards::ROW_MASK[7])) || (!move.color && (move.to & Bitboards::ROW_MASK[0]))) {   
+    //         board->pieces[move.color][PAWN] ^= move.to; // Remove pawn
+    //         board->pieces[move.color][QUEEN] ^= move.to; // Add queen
+    //         move.promotion = true;
+    //         move.type = QUEEN;
     //     }
     // }
-    // TODO: Not correct -> this may lead to multiple castles
-    if(move.type == KING) board->can_castle[move.color] = false;
-    // if(move.type == ROOK && (rook_start & board->pieces[move.color][ROOK]) == 0) board->can_castle[move.color] = false;
 
-    // Check for check
-    if(move.check) {
-        board->is_checked[!move.color] = true;
-    }
+    // // Check for castle
+    // // Bitboard rook_start = Bitboards::ROOK_START & ((move.color) ? Bitboards::ALL_WHITE_START : Bitboards::ALL_BLACK_START);
+    // // if(move.castle && (rook_start & board->pieces[move.color][ROOK]) != 0) {
+    // //     if((move.to & ((rook_start << 1) & Bitboards::COLUMN_MASK[1])) != 0) { // Left
+    // //         board->pieces[move.color][ROOK] ^= (move.to << 1);
+    // //         board->pieces[move.color][ROOK] ^= (move.to >> 1);
+    // //         board->can_castle[move.color] = false;
+    // //     }
+    // //     if((move.to & ((rook_start >> 1) & Bitboards::COLUMN_MASK[6])) != 0) { // Right
+    // //         board->pieces[move.color][ROOK] ^= (move.to >> 1);
+    // //         board->pieces[move.color][ROOK] ^= (move.to << 1);
+    // //         board->can_castle[move.color] = false;
+    // //     }
+    // // }
+    // // TODO: Not correct -> this may lead to multiple castles
+    // if(move.type == KING) board->can_castle[move.color] = false;
+    // // if(move.type == ROOK && (rook_start & board->pieces[move.color][ROOK]) == 0) board->can_castle[move.color] = false;
+
+    // // Check for check
+    // if(move.check) {
+    //     board->is_checked[!move.color] = true;
+    // }
 
     board->history.push(move);
 }
@@ -69,32 +82,32 @@ void Movegen::unmake_move(Board* board) {
 
     if(move.capture) board->pieces[!move.color][move.capture_type] ^= move.to; // Undo capture
 
-    // Undo promotion
-    if(move.promotion) {
-        if((move.color && (move.to & Bitboards::ROW_MASK[7])) || (!move.color && (move.to & Bitboards::ROW_MASK[0]))) {   
-            board->pieces[move.color][PAWN] ^= move.from; // Add pawn
-            board->pieces[move.color][QUEEN] ^= move.from; // Remove queen
-        } 
-    }
-   
-    // Undo castle
-    // if(move.type == KING && move.castle) {
-    //     if((move.to & Bitboards::COLUMN_MASK[1]) != 0) { // Left
-    //         board->pieces[move.color][ROOK] ^= (move.to << 1);
-    //         board->pieces[move.color][ROOK] ^= (move.to >> 1);
-    //         board->can_castle[move.color] = true; 
-    //     }
-    //     if((move.to & Bitboards::COLUMN_MASK[6]) != 0) { // Right
-    //         board->pieces[move.color][ROOK] ^= (move.to >> 1);
-    //         board->pieces[move.color][ROOK] ^= (move.to << 1);
-    //         board->can_castle[move.color] = true; 
-    //     }
+    // // Undo promotion
+    // if(move.promotion) {
+    //     if((move.color && (move.to & Bitboards::ROW_MASK[7])) || (!move.color && (move.to & Bitboards::ROW_MASK[0]))) {   
+    //         board->pieces[move.color][PAWN] ^= move.from; // Add pawn
+    //         board->pieces[move.color][QUEEN] ^= move.from; // Remove queen
+    //     } 
     // }
+   
+    // // Undo castle
+    // // if(move.type == KING && move.castle) {
+    // //     if((move.to & Bitboards::COLUMN_MASK[1]) != 0) { // Left
+    // //         board->pieces[move.color][ROOK] ^= (move.to << 1);
+    // //         board->pieces[move.color][ROOK] ^= (move.to >> 1);
+    // //         board->can_castle[move.color] = true; 
+    // //     }
+    // //     if((move.to & Bitboards::COLUMN_MASK[6]) != 0) { // Right
+    // //         board->pieces[move.color][ROOK] ^= (move.to >> 1);
+    // //         board->pieces[move.color][ROOK] ^= (move.to << 1);
+    // //         board->can_castle[move.color] = true; 
+    // //     }
+    // // }
 
-     // Undo check
-    if(move.check) {
-        board->is_checked[!move.color] = false;
-    }
+    //  // Undo check
+    // if(move.check) {
+    //     board->is_checked[!move.color] = false;
+    // }
 
     board->history.pop();
 }
@@ -154,7 +167,13 @@ void Movegen::get_moves_for(Bitboard from, bool color, uint type, Board* board) 
             board->moves[move.color].push_back(move);
         }
     }
+
+    // std::sort( board->moves[move.color].begin( ), board->moves[move.color].end(), []( const Move& lhs, const Move& rhs )
+    // {
+    // return lhs.capture > rhs.capture;
+    // });
 }
+
 
 Bitboard Movegen::get_bishop_moves(Bitboard bb, bool color, Board* board) {
     uint_fast16_t pos = log2(bb & -bb);
@@ -369,61 +388,60 @@ Bitboard Movegen::get_queen_moves(Bitboard bb, bool color, Board* board) {
  	return total_moves;
  }
 
- void Movegen::calculate_all_moves(bool color) {
-    if(color) {
-        board->moves[WHITE].clear();
-        std::vector<Bitboard> white_pawn_bb_pos = this->seperate_bitboards(board->pieces[WHITE][PAWN]);
-        std::vector<Bitboard> white_rook_bb_pos = this->seperate_bitboards(board->pieces[WHITE][ROOK]);
-        std::vector<Bitboard> white_knight_bb_pos = this->seperate_bitboards(board->pieces[WHITE][KNIGHT]);
-        std::vector<Bitboard> white_bishop_bb_pos = this->seperate_bitboards(board->pieces[WHITE][BISHOP]);
-        std::vector<Bitboard> white_queen_bb_pos = this->seperate_bitboards(board->pieces[WHITE][QUEEN]);
-        std::vector<Bitboard> white_king_bb_pos = this->seperate_bitboards(board->pieces[WHITE][KING]);
-        // White moves
-        for (auto p : white_pawn_bb_pos) {
-            this->get_moves_for(p, WHITE, PAWN, board);
-        }
-        for (auto p : white_rook_bb_pos) {
-            this->get_moves_for(p, WHITE, ROOK, board);
-        }
-        for (auto p : white_knight_bb_pos) {
-            this->get_moves_for(p, WHITE, KNIGHT, board);
-        }
-        for (auto p : white_bishop_bb_pos) {
-            this->get_moves_for(p, WHITE, BISHOP, board);
-        }
-        for (auto p : white_queen_bb_pos) {
-            this->get_moves_for(p, WHITE, QUEEN, board);
-        }
-        for (auto p : white_king_bb_pos) {
-            this->get_moves_for(p, WHITE, KING, board);
-        }
-    } else {
-        board->moves[BLACK].clear();
-        std::vector<Bitboard> black_pawn_bb_pos = this->seperate_bitboards(board->pieces[BLACK][PAWN]);
-        std::vector<Bitboard> black_rook_bb_pos = this->seperate_bitboards(board->pieces[BLACK][ROOK]);
-        std::vector<Bitboard> black_knight_bb_pos = this->seperate_bitboards(board->pieces[BLACK][KNIGHT]);
-        std::vector<Bitboard> black_bishop_bb_pos = this->seperate_bitboards(board->pieces[BLACK][BISHOP]);
-        std::vector<Bitboard> black_queen_bb_pos = this->seperate_bitboards(board->pieces[BLACK][QUEEN]);
-        std::vector<Bitboard> black_king_bb_pos = this->seperate_bitboards(board->pieces[BLACK][KING]);
-        // Black moves
-        for (auto p : black_pawn_bb_pos) {
-            this->get_moves_for(p, BLACK, PAWN, board);
-        }
-        for (auto p : black_rook_bb_pos) {
-            this->get_moves_for(p, BLACK, ROOK, board);
-        }
-        for (auto p : black_knight_bb_pos) {
-            this->get_moves_for(p, BLACK, KNIGHT, board);
-        }
-        for (auto p : black_bishop_bb_pos) {
-            this->get_moves_for(p, BLACK, BISHOP, board);
-        }
-        for (auto p : black_queen_bb_pos) {
-            this->get_moves_for(p, BLACK, QUEEN, board);
-        }
-        for (auto p : black_king_bb_pos) {
-            this->get_moves_for(p, BLACK, KING, board);
-        }
+ void Movegen::calculate_all_moves() {
+    board->moves[WHITE].clear();
+    board->moves[BLACK].clear();
+    std::vector<Bitboard> white_pawn_bb_pos = this->seperate_bitboards(board->pieces[WHITE][PAWN]);
+    std::vector<Bitboard> white_rook_bb_pos = this->seperate_bitboards(board->pieces[WHITE][ROOK]);
+    std::vector<Bitboard> white_knight_bb_pos = this->seperate_bitboards(board->pieces[WHITE][KNIGHT]);
+    std::vector<Bitboard> white_bishop_bb_pos = this->seperate_bitboards(board->pieces[WHITE][BISHOP]);
+    std::vector<Bitboard> white_queen_bb_pos = this->seperate_bitboards(board->pieces[WHITE][QUEEN]);
+    std::vector<Bitboard> white_king_bb_pos = this->seperate_bitboards(board->pieces[WHITE][KING]);
+
+    std::vector<Bitboard> black_pawn_bb_pos = this->seperate_bitboards(board->pieces[BLACK][PAWN]);
+    std::vector<Bitboard> black_rook_bb_pos = this->seperate_bitboards(board->pieces[BLACK][ROOK]);
+    std::vector<Bitboard> black_knight_bb_pos = this->seperate_bitboards(board->pieces[BLACK][KNIGHT]);
+    std::vector<Bitboard> black_bishop_bb_pos = this->seperate_bitboards(board->pieces[BLACK][BISHOP]);
+    std::vector<Bitboard> black_queen_bb_pos = this->seperate_bitboards(board->pieces[BLACK][QUEEN]);
+    std::vector<Bitboard> black_king_bb_pos = this->seperate_bitboards(board->pieces[BLACK][KING]);
+    // White moves
+    for (auto p : white_pawn_bb_pos) {
+        this->get_moves_for(p, WHITE, PAWN, board);
+    }
+    for (auto p : white_rook_bb_pos) {
+        this->get_moves_for(p, WHITE, ROOK, board);
+    }
+    for (auto p : white_knight_bb_pos) {
+        this->get_moves_for(p, WHITE, KNIGHT, board);
+    }
+    for (auto p : white_bishop_bb_pos) {
+        this->get_moves_for(p, WHITE, BISHOP, board);
+    }
+    for (auto p : white_queen_bb_pos) {
+        this->get_moves_for(p, WHITE, QUEEN, board);
+    }
+    for (auto p : white_king_bb_pos) {
+        this->get_moves_for(p, WHITE, KING, board);
+    }
+
+    // Black moves
+    for (auto p : black_pawn_bb_pos) {
+        this->get_moves_for(p, BLACK, PAWN, board);
+    }
+    for (auto p : black_rook_bb_pos) {
+        this->get_moves_for(p, BLACK, ROOK, board);
+    }
+    for (auto p : black_knight_bb_pos) {
+        this->get_moves_for(p, BLACK, KNIGHT, board);
+    }
+    for (auto p : black_bishop_bb_pos) {
+        this->get_moves_for(p, BLACK, BISHOP, board);
+    }
+    for (auto p : black_queen_bb_pos) {
+        this->get_moves_for(p, BLACK, QUEEN, board);
+    }
+    for (auto p : black_king_bb_pos) {
+        this->get_moves_for(p, BLACK, KING, board);
     }
  }
 
@@ -445,7 +463,7 @@ Bitboard Movegen::get_queen_moves(Bitboard bb, bool color, Board* board) {
 
  bool Movegen::check(Move& move) {
     bool prev_can_castle = board->can_castle[move.color];
-    make_move(move, board);
+    make_move(move, board, true);
 
     if(move.type == KING) {
         board->can_castle[move.color] = prev_can_castle;
