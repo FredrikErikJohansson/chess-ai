@@ -34,6 +34,10 @@ public:
 	Board(Board& board) { 
 		this->history = board.history;
 		this->pieces = board.pieces;
+		this->can_castle[BLACK] = board.can_castle[BLACK];
+		this->can_castle[WHITE] = board.can_castle[WHITE];
+		this->is_checked[BLACK] = board.is_checked[BLACK];
+		this->is_checked[WHITE] = board.is_checked[WHITE];
 		this->enpessant = board.enpessant;
 		this->moves = board.moves;
 	}
@@ -57,7 +61,7 @@ public:
 	std::stack<Move> history;
 	std::array<std::array<Bitboard, 6>, 2> pieces = {};
 	std::array<Bitboard, 2> enpessant = {0, 0};
-	bool can_castle[2] = {true, true};
+	bool can_castle[2] = {false, false};
 	bool is_checked[2] = {false, false};
 	std::array<std::vector<Move>, 2> moves;
 	//std::array<std::array<std::vector<Move>, 6>, 2> pos;

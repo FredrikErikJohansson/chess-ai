@@ -52,38 +52,42 @@ int main() {
         int depth = 5;
         int score = INT32_MIN;
         //int tmp_score = 0;
-        int counter = 0;
+        //int counter = 0;
         int move_idx = 0;
         int iterations = 0;
         auto root_moves = chessBoard.moves[tmp_color].size();
-        int i;
+        uint i;
+        // Sometime segfault (castle???)
         if(tmp_color) {
-            #pragma omp parallel// for 
+            #pragma omp parallel for schedule(dynamic, 1)
             for(i = 0; i < root_moves; i++) {
                 Board tmp_board(chessBoard);
                 Movegen tmp_gen = Movegen(&tmp_board);
                 Search tmp_search = Search(&tmp_board, &tmp_gen);
-                tmp_gen.make_move(chessBoard.moves[tmp_color][i], &tmp_board);
+                tmp_gen.make_move(tmp_board.moves[tmp_color][i], &tmp_board);
                 tmp_gen.calculate_all_moves();
 
-                int tmp_score = tmp_search.alpha_beta_max(INT32_MIN, INT32_MAX, depth-1, iterations);
-
+                //#pragma omp single
+                int tmp_score = -tmp_search.alpha_beta_min(INT32_MIN, INT32_MAX, depth-1, iterations);
                 tmp_gen.unmake_move(&tmp_board);
                 tmp_gen.calculate_all_moves();
 
-                #pragma omp critical
+                //#pragma omp critical
                 if(score < tmp_score) {
+                    //std::cout << i << std::endl;
                     score = tmp_score;
+                    //#pragma omp atomic write
                     move_idx = i;
                 }
             }
-            //std::cout << "SCORE FOR WHITE: " << score << std::endl;
+            std::cout << "SCORE FOR WHITE: " << score << std::endl;
         }
         //std::cout << move_idx << std::endl;
 
         std::cout << "Iterations: " << iterations << std::endl;
         std::cout << "STACK SIZE: " << chessBoard.history.size() << std::endl;
-
+        std::cout << "First move: " << move_idx << std::endl;
+        chessBoard.print(chessBoard.moves[tmp_color][move_idx].from);
         if(tmp_color) moveGen.make_move(chessBoard.moves[tmp_color][move_idx], &chessBoard); // First pawn do first move
         else moveGen.make_move(chessBoard.moves[tmp_color][rand_num], &chessBoard); // First pawn do first move
         std::cout << "color " << tmp_color << " can castle: " << chessBoard.can_castle[tmp_color]<< std::endl;

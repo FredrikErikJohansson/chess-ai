@@ -1,11 +1,12 @@
 SRC := ./src
 SRCS := $(wildcard $(SRC)/*.cpp)
+HEADERS := $(wildcard $(SRC)/*.h)
 CXX = clang++
 CXXFLAGS := -O3 -Wall -Wextra -MMD -fopenmp
 
 all: chess
 
-chess: $(SRCS)
+chess: $(SRCS) $(HEADERS)
 	$(CXX) $(CXXFLAGS) $(SRCS) -o $@
 
 .PHONY: clean

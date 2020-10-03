@@ -9,7 +9,6 @@ int Search::evaluate(bool color) {
             for (int col = 0; col <= 7; ++col) {
                 if (bb & (1ULL << ((row * 8) + col))) {
                     score += piece_score[i];
-                    int test = score;
                     switch (i)
                     {
                     case 0:
@@ -39,24 +38,21 @@ int Search::evaluate(bool color) {
             counter++;
         }
     }
-    if(!color) return -score;
     return score;
 }
 
 int Search::alpha_beta_max(int alpha, int beta, int depth_left, int& iterations) {
     if (depth_left == 0) return evaluate(WHITE);
-    int score = INT32_MIN;
+    //int score = INT32_MIN;
+    int score;
     movegen->calculate_all_moves();
     for (auto move : board->moves[WHITE]) {
-        movegen->make_move(move, board, false);
+        movegen->make_move(move, board);
         movegen->calculate_all_moves();
-        auto first = board->moves[WHITE].size();
         ++iterations;
         score = alpha_beta_min(alpha, beta, depth_left - 1, iterations);
         movegen->unmake_move(board);
         movegen->calculate_all_moves();
-        auto second = board->moves[WHITE].size();
-        //if(first - second != 0) std::cout << "FEL!" << std::endl;
         if(score >= beta) return beta;   // fail hard beta-cutoff
         if(score > alpha) alpha = score; // alpha acts like max in MiniMax
     }
@@ -64,19 +60,17 @@ int Search::alpha_beta_max(int alpha, int beta, int depth_left, int& iterations)
 }
 
 int Search::alpha_beta_min(int alpha, int beta, int depth_left, int& iterations) {
-    if (depth_left == 0) return evaluate(BLACK);
-    int score = INT32_MAX;
+    if (depth_left == 0) return -evaluate(BLACK);
+    //int score = INT32_MAX;
+    int score;
     movegen->calculate_all_moves();
     for (auto move : board->moves[BLACK]) {
-        movegen->make_move(move, board, false);
+        movegen->make_move(move, board);
         movegen->calculate_all_moves();
-        auto first = board->moves[WHITE].size();
         ++iterations;
         score = alpha_beta_max( alpha, beta, depth_left - 1, iterations);
         movegen->unmake_move(board);
         movegen->calculate_all_moves();
-        auto second = board->moves[WHITE].size();
-        //if(first - second != 0) std::cout << "FEL!" << std::endl;
         if(score <= alpha) return alpha; // fail hard alpha-cutoff
         if(score < beta) beta = score; // beta acts like min in MiniMax
     }
