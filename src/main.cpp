@@ -49,8 +49,10 @@ int main() {
             std::cout << !tmp_color << " won!" << std::endl;
             break;;
         }
-        int depth = 5;
-        int score = INT32_MIN;
+        int depth = 5; // Should be uneven
+        int alpha = INT32_MIN;
+        int beta = INT32_MAX;
+        int score = INT32_MAX;
         //int tmp_score = 0;
         //int counter = 0;
         int move_idx = 0;
@@ -59,22 +61,23 @@ int main() {
         uint i;
         // Sometime segfault (castle???)
         if(tmp_color) {
-            #pragma omp parallel for schedule(dynamic, 1)
+            //#pragma omp parallel for schedule(dynamic, 1)
             for(i = 0; i < root_moves; i++) {
-                Board tmp_board(chessBoard);
-                Movegen tmp_gen = Movegen(&tmp_board);
-                Search tmp_search = Search(&tmp_board, &tmp_gen);
-                tmp_gen.make_move(tmp_board.moves[tmp_color][i], &tmp_board);
-                tmp_gen.calculate_all_moves();
+                // Board tmp_board(chessBoard);
+                // Movegen tmp_gen = Movegen(&tmp_board);
+                // Search tmp_search = Search(&tmp_board, &tmp_gen);
+                moveGen.make_move(chessBoard.moves[tmp_color][i], &chessBoard);
+                moveGen.calculate_all_moves();
 
                 //#pragma omp single
-                int tmp_score = -tmp_search.alpha_beta_min(INT32_MIN, INT32_MAX, depth-1, iterations);
-                tmp_gen.unmake_move(&tmp_board);
-                tmp_gen.calculate_all_moves();
+                int tmp_score = -search.alpha_beta_min(alpha, beta, depth-1, iterations);
+                moveGen.unmake_move(&chessBoard);
+                std::cout << tmp_score << std::endl;
+                moveGen.calculate_all_moves();
 
                 //#pragma omp critical
-                if(score < tmp_score) {
-                    //std::cout << i << std::endl;
+                if(score > tmp_score) {
+                    std::cout << i << std::endl;
                     score = tmp_score;
                     //#pragma omp atomic write
                     move_idx = i;

@@ -64,7 +64,7 @@ void Movegen::make_move(Move move, Board* board, bool from_check) {
         }
     }
     // TODO: Not correct -> this may lead to multiple castles
-    if(move.type == KING) board->can_castle[move.color] = false;
+    // if(move.type == KING) board->can_castle[move.color] = false;
     // if(move.type == ROOK && (rook_start & board->pieces[move.color][ROOK]) == 0) board->can_castle[move.color] = false;
 
     // Check for check

@@ -17,14 +17,16 @@ public:
     Search() {};
 
     int evaluate(bool color);
-    int alpha_beta_max(int alpha, int beta, int depth_left, int&);
-    int alpha_beta_min(int alpha, int beta, int depth_left, int&);
+    int alpha_beta_max(int& alpha, int& beta, int depth_left, int&);
+    int alpha_beta_min(int& alpha, int& beta, int depth_left, int&);
+    int alpha_beta( int& alpha, int& beta, int depthleft );
     // int alpha_beta(Board* board, int depth, int alpha, int beta, bool color);
 
 private:
     Board* board;
     Movegen* movegen;
-    std::array<int, 6> piece_score = { PAWN_SCORE, KNIGHT_SCORE, BISHOP_SCORE, ROOK_SCORE, QUEEN_SCORE, KING_SCORE };
+    int score;
+    std::array<int, 6> piece_score = { PAWN_SCORE, ROOK_SCORE, KNIGHT_SCORE, BISHOP_SCORE, QUEEN_SCORE, KING_SCORE };
 
     int pawn_square_values[64] = {
         0,  0,  0,  0,  0,  0,  0,  0,
