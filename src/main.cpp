@@ -49,7 +49,7 @@ int main() {
             std::cout << !tmp_color << " won!" << std::endl;
             break;
         }
-        int depth = 5; // Should be uneven??
+        int depth = 4; // Should be even??
         int alpha = INT32_MIN;
         int beta = INT32_MAX;
         int score = 0;
@@ -67,7 +67,8 @@ int main() {
                 // Board tmp_board(chessBoard);
                 // Movegen tmp_gen = Movegen(&tmp_board);
                 // Search tmp_search = Search(&tmp_board, &tmp_gen);
-                move_idx = search.alpha_beta_first(alpha, beta, depth, tmp_color, iterations);
+                auto move = search.alpha_beta_first(alpha, beta, depth, tmp_color, iterations);
+                //chessBoard.last_move[tmp_color] = chessBoard.moves[tmp_color][move_idx];
                 //else move_idx = -search.alpha_beta_first(alpha, beta, depth-1, tmp_color, iterations);
                 // tmp_gen.calculate_all_moves();
                 // tmp_gen.make_move(chessBoard.moves[tmp_color][i], &tmp_board);
@@ -101,9 +102,9 @@ int main() {
         std::cout << "Iterations: " << iterations << std::endl;
         std::cout << "STACK SIZE: " << chessBoard.history.size() << std::endl;
         std::cout << "First move: " << move_idx << std::endl;
-        chessBoard.print(chessBoard.moves[tmp_color][move_idx].from);
-        if(tmp_color) moveGen.make_move(chessBoard.moves[tmp_color][move_idx], &chessBoard); // First pawn do first move
-        else moveGen.make_move(chessBoard.moves[tmp_color][rand_num], &chessBoard); // First pawn do first move
+        //chessBoard.print(chessBoard.moves[tmp_color][move_idx].from);
+        //if(tmp_color) moveGen.make_move(chessBoard.moves[tmp_color][move_idx], &chessBoard); // First pawn do first move
+        moveGen.make_move(move, &chessBoard); // First pawn do first move
         std::cout << "color " << tmp_color << " can castle: " << chessBoard.can_castle[tmp_color]<< std::endl;
         
         if(tmp_color) std::cout << "WHITE:" << std::endl;

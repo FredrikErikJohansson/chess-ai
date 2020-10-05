@@ -55,7 +55,12 @@ public:
 		this->enpessant = board.enpessant;
 		this->moves = board.moves;
 	}
-    Board() {};
+    Board() {
+		last_move[WHITE].from = 0;
+		last_move[WHITE].to = 0;
+		last_move[BLACK].from = 0;
+		last_move[BLACK].to = 0;
+	};
 
 	void initialize();
 	void clear();
@@ -78,5 +83,7 @@ public:
 	bool can_castle[2] = {true, true};
 	bool is_checked[2] = {false, false};
 	std::array<std::vector<Move>, 2> moves;
+	std::array<Move, 2> last_move;
+	
 	//std::array<std::array<std::vector<Move>, 6>, 2> pos;
 };

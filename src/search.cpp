@@ -97,7 +97,7 @@ int Search::alpha_beta( int alpha, int beta, int depth_left, bool color, int& tm
    return alpha;
 }
 
-int Search::alpha_beta_first( int alpha, int beta, int depth_left, bool color, int& tmp_iterations) {
+Move Search::alpha_beta_first( int alpha, int beta, int depth_left, bool color, int& tmp_iterations) {
     movegen->calculate_all_moves();
     int tmp_score = 0;
     int max_score = 0;
@@ -112,17 +112,22 @@ int Search::alpha_beta_first( int alpha, int beta, int depth_left, bool color, i
         //std::cout << tmp_score << std::endl;
         movegen->unmake_move(board);
         movegen->calculate_all_moves();
-        if(tmp_score > max_score) {
-            max_score = tmp_score;
-            best_moves.clear();
-            best_moves.push_back(counter);
-        } else if(tmp_score == max_score) {
-            best_moves.push_back(counter);
+        if(board->moves[color][counter].from != board->last_move[color].to &&
+        board->moves[color][counter].to != board->last_move[color].from) {
+            if(tmp_score > max_score) {
+                max_score = tmp_score;
+                best_moves.clear();
+                best_moves.push_back(counter);
+            } else if(tmp_score == max_score) {
+                best_moves.push_back(counter);
+            }
         }
+        
         counter++;
     }
-    std::cout << best_moves.size() << std::endl;
-    return best_moves[rand() % best_moves.size()];
+    if(best_moves.size() == 0) return board->moves[color][0]; 
+    board->last_move[color] = board->moves[color][best_moves[rand() % best_moves.size()]];
+    return board->last_move[color];
 }
 
 int Search::quiesce(int alpha, int beta, bool color) {
@@ -137,12 +142,16 @@ int Search::quiesce(int alpha, int beta, bool color) {
     // for(auto move : board->moves[color])
     //     if(move.capture) std:: cout << "Capture!!: " << std::endl;
 
-    Bitboard attacked_pos = movegen->under_attack(!color);
+    Bitboard attacked_pos = movegen->under_attack(color);
+    Bitboard attacking_pos = movegen->under_attack(!color);
+    Bitboard attacking_pawns = board->pieces[color][PAWN];
+    //Bitboard attacking_pawns =  if(((move.to << 9) & board->pieces[BLACK][PAWN]) != 0 ||
+    //            ((move.to << 7) & board->pieces[BLACK][PAWN]) != 0) {
     //board->print(attacked_pos);
     board->moves[color].erase(
     std::remove_if(board->moves[color].begin(), board->moves[color].end(),
-        [attacked_pos](const Move& move) { 
-            return !(attacked_pos & move.to); 
+        [attacked_pos, attacking_pos, attacking_pawns, color](const Move& move) { 
+            return !((attacking_pos | attacked_pos | (((color) ? (move.to << 9) : (move.to >> 9)) & attacking_pawns) | (((color) ? (move.to << 7) : (move.to >> 7)) & attacking_pawns)) & move.to); 
             }),
     board->moves[color].end());
 
