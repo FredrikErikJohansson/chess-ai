@@ -47,12 +47,12 @@ int main() {
 
         if(chessBoard.moves[tmp_color].size() < 1) {
             std::cout << !tmp_color << " won!" << std::endl;
-            break;;
+            break;
         }
-        int depth = 5; // Should be uneven
+        int depth = 7; // Should be uneven??
         int alpha = INT32_MIN;
         int beta = INT32_MAX;
-        int score = INT32_MAX;
+        int score = 0;
         //int tmp_score = 0;
         //int counter = 0;
         int move_idx = 0;
@@ -60,31 +60,42 @@ int main() {
         auto root_moves = chessBoard.moves[tmp_color].size();
         uint i;
         // Sometime segfault (castle???)
-        if(tmp_color) {
-            //#pragma omp parallel for schedule(dynamic, 1)
-            for(i = 0; i < root_moves; i++) {
+        //if(tmp_color) {
+            //#pragma omp parallel for schedule(dynamic, 1)// private(tmp_board, tmp_gen, tmp_search) 
+            //for(i = 0; i < root_moves; i++) {
+                //std::cout << i << std::endl;
                 // Board tmp_board(chessBoard);
                 // Movegen tmp_gen = Movegen(&tmp_board);
                 // Search tmp_search = Search(&tmp_board, &tmp_gen);
-                moveGen.make_move(chessBoard.moves[tmp_color][i], &chessBoard);
-                moveGen.calculate_all_moves();
+                move_idx = search.alpha_beta_first(alpha, beta, depth-1, tmp_color, iterations);
+                //else move_idx = -search.alpha_beta_first(alpha, beta, depth-1, tmp_color, iterations);
+                // tmp_gen.calculate_all_moves();
+                // tmp_gen.make_move(chessBoard.moves[tmp_color][i], &tmp_board);
+                // tmp_gen.calculate_all_moves();
 
-                //#pragma omp single
-                int tmp_score = -search.alpha_beta_min(alpha, beta, depth-1, iterations);
-                moveGen.unmake_move(&chessBoard);
-                std::cout << tmp_score << std::endl;
-                moveGen.calculate_all_moves();
+                // int alpha = INT32_MIN;
+                // int beta = INT32_MAX;
+                // //#pragma omp single
+                // int tmp_iterations = 0;
+                
+                // int tmp_score = -tmp_search.alpha_beta(alpha, beta, depth-1, BLACK, tmp_iterations);
+                // //int tmp_score = -search.alpha_beta_min(alpha, beta, depth-1, iterations);
+                // tmp_gen.unmake_move(&tmp_board);
+                // std::cout << tmp_score << std::endl;
+                // tmp_gen.calculate_all_moves();
 
-                //#pragma omp critical
-                if(score > tmp_score) {
-                    std::cout << i << std::endl;
-                    score = tmp_score;
-                    //#pragma omp atomic write
-                    move_idx = i;
-                }
-            }
+                // //#pragma omp critical
+                // if(score < tmp_score) {
+                //     std::cout << i << std::endl;
+                //     score = tmp_score;
+                //     //#pragma omp atomic write
+                //     move_idx = i;
+                // }
+                // //#pragma omp atomic write
+                // iterations = iterations + tmp_iterations;
+            //}
             std::cout << "SCORE FOR WHITE: " << score << std::endl;
-        }
+        //}
         //std::cout << move_idx << std::endl;
 
         std::cout << "Iterations: " << iterations << std::endl;

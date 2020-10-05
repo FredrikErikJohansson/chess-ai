@@ -1,6 +1,9 @@
 #include "board.h"
 #include "movegen.h"
 
+#include <algorithm>
+#include <cstdlib>
+
 #define PAWN_SCORE 100
 #define KNIGHT_SCORE 320
 #define BISHOP_SCORE 330
@@ -17,15 +20,17 @@ public:
     Search() {};
 
     int evaluate(bool color);
-    int alpha_beta_max(int& alpha, int& beta, int depth_left, int&);
-    int alpha_beta_min(int& alpha, int& beta, int depth_left, int&);
-    int alpha_beta( int& alpha, int& beta, int depthleft );
-    // int alpha_beta(Board* board, int depth, int alpha, int beta, bool color);
+    // int alpha_beta_max(int& alpha, int& beta, int depth_left, int&);
+    // int alpha_beta_min(int& alpha, int& beta, int depth_left, int&);
+    int alpha_beta( int alpha, int beta, int depthleft, bool color, int&);
+    int alpha_beta_first( int alpha, int beta, int depthleft, bool color, int&);
+    int quiesce( int alpha, int beta, bool color);
+    //int alpha_beta(int depth, int& alpha, int& beta, bool color, int&);
 
 private:
     Board* board;
     Movegen* movegen;
-    int score;
+    int score = 0;
     std::array<int, 6> piece_score = { PAWN_SCORE, ROOK_SCORE, KNIGHT_SCORE, BISHOP_SCORE, QUEEN_SCORE, KING_SCORE };
 
     int pawn_square_values[64] = {

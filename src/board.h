@@ -31,9 +31,23 @@ struct Move {
 class Board {
 public:
 
-	Board(Board& board) { 
+	Board(Board const& board) { 
 		this->history = board.history;
-		this->pieces = board.pieces;
+
+		this->pieces[BLACK][PAWN] = board.pieces[BLACK][PAWN];
+		this->pieces[BLACK][ROOK] = board.pieces[BLACK][ROOK];
+		this->pieces[BLACK][KNIGHT] = board.pieces[BLACK][KNIGHT];
+		this->pieces[BLACK][BISHOP] = board.pieces[BLACK][BISHOP];
+		this->pieces[BLACK][QUEEN] = board.pieces[BLACK][QUEEN];
+		this->pieces[BLACK][KING] = board.pieces[BLACK][KING];
+
+		this->pieces[WHITE][PAWN] = board.pieces[WHITE][PAWN];
+		this->pieces[WHITE][ROOK] = board.pieces[WHITE][ROOK];
+		this->pieces[WHITE][KNIGHT] = board.pieces[WHITE][KNIGHT];
+		this->pieces[WHITE][BISHOP] = board.pieces[WHITE][BISHOP];
+		this->pieces[WHITE][QUEEN] = board.pieces[WHITE][QUEEN];
+		this->pieces[WHITE][KING] = board.pieces[WHITE][KING];
+
 		this->can_castle[BLACK] = board.can_castle[BLACK];
 		this->can_castle[WHITE] = board.can_castle[WHITE];
 		this->is_checked[BLACK] = board.is_checked[BLACK];

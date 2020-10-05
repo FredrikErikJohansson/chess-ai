@@ -29,6 +29,8 @@ public:
     Bitboard get_king_moves(bool color, Board*);
     Bitboard get_all_moves(bool color, Board*);
 
+    Bitboard under_attack(bool color);
+
     void calculate_all_moves();
     Bitboard attacks_to_king(Bitboard bb, bool color);
 

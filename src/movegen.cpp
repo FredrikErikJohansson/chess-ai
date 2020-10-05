@@ -16,7 +16,8 @@ void Movegen::make_move(Move move, Board* board, bool from_check) {
     Bitboard capture_pos = 0;
     if(move.color == WHITE) capture_pos = move.to & board->get_all_black_pieces();
     else if(move.color == BLACK) capture_pos = move.to & board->get_all_white_pieces();
-    
+
+    //if(capture_pos != 0) move.capture = true;
     
     if(capture_pos != 0 && !from_check) {
         for(uint capture_type = 0; capture_type < 6; ++capture_type) {
@@ -168,9 +169,11 @@ void Movegen::get_moves_for(Bitboard from, bool color, uint type, Board* board) 
         }
     }
 
-    std::sort( board->moves[move.color].begin( ), board->moves[move.color].end(), []( const Move& lhs, const Move& rhs )
-    {
-    return lhs.capture > rhs.capture;
+    Bitboard attacked_pos = under_attack(!color);
+    std::sort( board->moves[move.color].begin( ), board->moves[move.color].end(), [attacked_pos]( const Move& lhs, const Move& rhs )
+    {   
+        //if((lhs.to & attacked_pos)  > (rhs.capture & attacked_pos)) std::cout << "1" << std::endl; 
+        return ((lhs.to & attacked_pos)  > (rhs.to & attacked_pos));
     });
 }
 
@@ -378,6 +381,11 @@ Bitboard Movegen::get_queen_moves(Bitboard bb, bool color, Board* board) {
 //         cb[0].AllWhitePieces = (cb[0].AllWhitePieces - ((Bitboard)1 << start)) + ((Bitboard)1 << end);
 //     }
 // }
+
+Bitboard Movegen::under_attack(bool color) {
+    if(color) return (board->get_all_white_pieces() & get_all_moves(BLACK, board));
+    else return (board->get_all_black_pieces() & get_all_moves(WHITE, board));
+}
 
  Bitboard Movegen::get_all_moves(bool color, Board* board) {
  	Bitboard total_moves = 0;
