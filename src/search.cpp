@@ -144,7 +144,7 @@ int Search::quiesce(int alpha, int beta, bool color) {
 
     Bitboard attacked_pos = movegen->under_attack(color);
     Bitboard attacking_pos = movegen->under_attack(!color);
-    Bitboard attacking_pawns = board->pieces[color][PAWN];
+    Bitboard attacking_pawns = board->pieces[!color][PAWN];
     //Bitboard attacking_pawns =  if(((move.to << 9) & board->pieces[BLACK][PAWN]) != 0 ||
     //            ((move.to << 7) & board->pieces[BLACK][PAWN]) != 0) {
     //board->print(attacked_pos);
