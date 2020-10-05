@@ -1,7 +1,7 @@
 #include "search.h"
 
 int Search::evaluate(bool color) {
-    int tmp_score = 0;
+    int tmp_score = board->moves[color].size(); // Weight number of moves
     for(int i = 0; i < 6; ++i) {
         Bitboard bb = board->pieces[color][i];
         int counter = 0;
