@@ -100,15 +100,15 @@ int Search::alpha_beta( int alpha, int beta, int depth_left, bool color, int& tm
 Move Search::alpha_beta_first( int alpha, int beta, int depth_left, bool color, int& tmp_iterations) {
     movegen->calculate_all_moves();
     int tmp_score = 0;
-    int max_score = 0;
+    int max_score = INT32_MIN;
     int counter = 0;
-    int sign = (color) ? -1 : 1;
+    //int sign = (color) ? -1 : -1;
     std::vector<int> best_moves;
     for (auto move : board->moves[color]) {
         movegen->make_move(move, board);
         movegen->calculate_all_moves();
         ++tmp_iterations;
-        tmp_score = sign * alpha_beta( -alpha, -beta, depth_left - 1, !color, tmp_iterations);
+        tmp_score = -alpha_beta( -alpha, -beta, depth_left - 1, !color, tmp_iterations);
         //std::cout << tmp_score << std::endl;
         movegen->unmake_move(board);
         movegen->calculate_all_moves();
@@ -131,18 +131,19 @@ Move Search::alpha_beta_first( int alpha, int beta, int depth_left, bool color, 
 }
 
 int Search::quiesce(int alpha, int beta, bool color) {
-    int stand_pat = ((color) ? evaluate(color) : -evaluate(color));
+    int stand_pat = evaluate(color);//((color) ? evaluate(color) : -evaluate(color));
     if(stand_pat >= beta) return stand_pat;
     if(alpha < stand_pat) alpha = stand_pat;
 
     movegen->calculate_all_moves();
+    color = !color;
     // std::vector<Move> capture_moves;
     // std::back_insert_iterator< std::vector<Move>> back_it (capture_moves);
 
     // for(auto move : board->moves[color])
     //     if(move.capture) std:: cout << "Capture!!: " << std::endl;
 
-    Bitboard attacked_pos = movegen->under_attack(color);
+    //Bitboard attacked_pos = movegen->under_attack(color);
     Bitboard attacking_pos = movegen->under_attack(!color);
     Bitboard attacking_pawns = board->pieces[!color][PAWN];
     //Bitboard attacking_pawns =  if(((move.to << 9) & board->pieces[BLACK][PAWN]) != 0 ||
@@ -150,8 +151,9 @@ int Search::quiesce(int alpha, int beta, bool color) {
     //board->print(attacked_pos);
     board->moves[color].erase(
     std::remove_if(board->moves[color].begin(), board->moves[color].end(),
-        [attacked_pos, attacking_pos, attacking_pawns, color](const Move& move) { 
-            return !((attacking_pos | attacked_pos | (((color) ? (move.to << 9) : (move.to >> 9)) & attacking_pawns) | (((color) ? (move.to << 7) : (move.to >> 7)) & attacking_pawns)) & move.to); 
+        [attacking_pos, attacking_pawns, color](const Move& move) { 
+            Bitboard pawn_attack = ((((color) ? (move.to << 9) : (move.to >> 9)) & attacking_pawns) | (((color) ? (move.to << 7) : (move.to >> 7)) & attacking_pawns));
+            return (!((attacking_pos) & move.to) || !pawn_attack); 
             }),
     board->moves[color].end());
 

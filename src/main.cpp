@@ -49,7 +49,7 @@ int main() {
             std::cout << !tmp_color << " won!" << std::endl;
             break;
         }
-        int depth = 4; // Should be even??
+        int depth = 6; // Even = defense, Uneven = aggressive
         int alpha = INT32_MIN;
         int beta = INT32_MAX;
         int score = 0;
@@ -105,7 +105,7 @@ int main() {
         //chessBoard.print(chessBoard.moves[tmp_color][move_idx].from);
         //if(tmp_color) moveGen.make_move(chessBoard.moves[tmp_color][move_idx], &chessBoard); // First pawn do first move
         moveGen.make_move(move, &chessBoard); // First pawn do first move
-        std::cout << "color " << tmp_color << " can castle: " << chessBoard.can_castle[tmp_color]<< std::endl;
+        //std::cout << "color " << tmp_color << " can castle: " << chessBoard.can_castle[tmp_color]<< std::endl;
         
         if(tmp_color) std::cout << "WHITE:" << std::endl;
         else std::cout << "BLACK:" << std::endl;
