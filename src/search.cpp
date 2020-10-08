@@ -1,7 +1,15 @@
 #include "search.h"
 
-int Search::evaluate(bool color) {
+int Search::evaluate(bool color, Board* board) {
     int tmp_score = board->moves[color].size(); // Weight number of moves
+    if(tmp_score < 1) {
+        if(movegen->attacks_to_king(board->pieces[color][KING], color, board) != 0) {
+            //std::cout << "CHECKMATE" << std::endl;
+            return INT32_MAX/8;
+        }
+        //std::cout << "STALEMATE" << std::endl;
+        return 0;
+    }
     for(int i = 0; i < 6; ++i) {
         Bitboard bb = board->pieces[color][i];
         int counter = 0;
@@ -78,16 +86,21 @@ int Search::evaluate(bool color) {
 //    return beta;
 // }
 
-int Search::alpha_beta( int alpha, int beta, int depth_left, bool color, int& tmp_iterations) {
-   if (depth_left == 0) return quiesce(alpha, beta, color);//(color) ? quiesce(alpha, beta, color) : -quiesce(alpha, beta, color);
-    movegen->calculate_all_moves();
+int Search::alpha_beta( int alpha, int beta, int depth_left, bool color, int& tmp_iterations, Board* board) {
+    movegen->calculate_all_moves(board);
+    if(board->moves[color].size() < 1) {
+        //std::cout << "Terminal" << std::endl;
+        return (color) ? (depth_left*evaluate(color,board)) : -(depth_left*evaluate(color,board));
+    } 
+    if(depth_left == 0) return quiesce(alpha, beta, color, board);//(color) ? quiesce(alpha, beta, color) : -quiesce(alpha, beta, color);  
+
     for (auto move : board->moves[color]) {
         movegen->make_move(move, board);
-        movegen->calculate_all_moves();
+        movegen->calculate_all_moves(board);
         ++tmp_iterations;
-        score = -alpha_beta( -alpha, -beta, depth_left - 1, !color, tmp_iterations);
+        score = -alpha_beta( -alpha, -beta, depth_left - 1, !color, tmp_iterations, board);
         movegen->unmake_move(board);
-        movegen->calculate_all_moves();
+        movegen->calculate_all_moves(board);
         if(score >= beta) {
             return score; // fail hard alpha-cutoff
         }
@@ -97,8 +110,8 @@ int Search::alpha_beta( int alpha, int beta, int depth_left, bool color, int& tm
    return alpha;
 }
 
-Move Search::alpha_beta_first( int alpha, int beta, int depth_left, bool color, int& tmp_iterations) {
-    movegen->calculate_all_moves();
+Move Search::alpha_beta_first( int alpha, int beta, int depth_left, bool color, int& tmp_iterations, Board* board) {
+    movegen->calculate_all_moves(board);
     int tmp_score = 0;
     int max_score = INT32_MIN;
     int counter = 0;
@@ -106,12 +119,15 @@ Move Search::alpha_beta_first( int alpha, int beta, int depth_left, bool color, 
     std::vector<int> best_moves;
     for (auto move : board->moves[color]) {
         movegen->make_move(move, board);
-        movegen->calculate_all_moves();
+        movegen->calculate_all_moves(board);
         ++tmp_iterations;
-        tmp_score = -alpha_beta( -alpha, -beta, depth_left - 1, !color, tmp_iterations);
+        tmp_score = -alpha_beta( -alpha, -beta, depth_left - 1, !color, tmp_iterations, board);
         //std::cout << tmp_score << std::endl;
         movegen->unmake_move(board);
-        movegen->calculate_all_moves();
+        movegen->calculate_all_moves(board);
+
+        //std::cout << tmp_score << std::endl;
+
         if(board->moves[color][counter].from != board->last_move[color].to &&
         board->moves[color][counter].to != board->last_move[color].from) {
             if(tmp_score > max_score) {
@@ -130,12 +146,12 @@ Move Search::alpha_beta_first( int alpha, int beta, int depth_left, bool color, 
     return board->last_move[color];
 }
 
-int Search::quiesce(int alpha, int beta, bool color) {
-    int stand_pat = evaluate(color);//((color) ? evaluate(color) : -evaluate(color));
+int Search::quiesce(int alpha, int beta, bool color, Board* board) {
+    int stand_pat = ((color) ? evaluate(color, board) : -evaluate(color, board));
     if(stand_pat >= beta) return stand_pat;
     if(alpha < stand_pat) alpha = stand_pat;
 
-    movegen->calculate_all_moves();
+    movegen->calculate_all_moves(board);
     color = !color;
     // std::vector<Move> capture_moves;
     // std::back_insert_iterator< std::vector<Move>> back_it (capture_moves);
@@ -144,7 +160,7 @@ int Search::quiesce(int alpha, int beta, bool color) {
     //     if(move.capture) std:: cout << "Capture!!: " << std::endl;
 
     //Bitboard attacked_pos = movegen->under_attack(color);
-    Bitboard attacking_pos = movegen->under_attack(!color);
+    Bitboard attacking_pos = movegen->under_attack(!color, board);
     Bitboard attacking_pawns = board->pieces[!color][PAWN];
     //Bitboard attacking_pawns =  if(((move.to << 9) & board->pieces[BLACK][PAWN]) != 0 ||
     //            ((move.to << 7) & board->pieces[BLACK][PAWN]) != 0) {
@@ -166,11 +182,10 @@ int Search::quiesce(int alpha, int beta, bool color) {
     for(auto move : board->moves[color])  {
         //if(move.capture) 
         movegen->make_move(move, board);
-        movegen->calculate_all_moves();
-        score = -quiesce(-beta, -alpha, !color);
+        movegen->calculate_all_moves(board);
+        score = -quiesce(-beta, -alpha, !color, board);
         movegen->unmake_move(board);
-        movegen->calculate_all_moves();
-
+        movegen->calculate_all_moves(board);
         if(score >= beta) return score;
         if(score > alpha) alpha = score;
     }

@@ -2,7 +2,7 @@ SRC := ./src
 SRCS := $(wildcard $(SRC)/*.cpp)
 HEADERS := $(wildcard $(SRC)/*.h)
 CXX = clang++
-CXXFLAGS := -O3 -Wall -Wextra -MMD -fopenmp 
+CXXFLAGS := -03 -Wall -Wextra -MMD -fopenmp 
 
 all: chess
 

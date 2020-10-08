@@ -19,12 +19,14 @@ int main() {
     for(int turn = 0; turn < 1000; turn++) {
 
         
-        moveGen.calculate_all_moves(); 
+        moveGen.calculate_all_moves(&chessBoard);
 
         //chessBoard.print(moveGen.get_all_moves(WHITE, &chessBoard));
 
         std::cout << "White move count: " << chessBoard.moves[WHITE].size() << std::endl;
         std::cout << "Black move count: " << chessBoard.moves[BLACK].size() << std::endl;
+        std::cout << "White pieces: " << chessBoard.num_of_pieces[WHITE] << std::endl;
+        std::cout << "Black Black: " << chessBoard.num_of_pieces[BLACK] << std::endl;
         std::random_device dev;
         std::mt19937 rng(dev());
         
@@ -67,8 +69,10 @@ int main() {
                 // Board tmp_board(chessBoard);
                 // Movegen tmp_gen = Movegen(&tmp_board);
                 // Search tmp_search = Search(&tmp_board, &tmp_gen);
-                auto move = search.alpha_beta_first(alpha, beta, depth, tmp_color, iterations);
+                auto move = search.alpha_beta_first(alpha, beta, depth, tmp_color, iterations, &chessBoard);
+
                 //chessBoard.last_move[tmp_color] = chessBoard.moves[tmp_color][move_idx];
+                std::cout << "asd";
                 //else move_idx = -search.alpha_beta_first(alpha, beta, depth-1, tmp_color, iterations);
                 // tmp_gen.calculate_all_moves();
                 // tmp_gen.make_move(chessBoard.moves[tmp_color][i], &tmp_board);

@@ -54,6 +54,11 @@ public:
 		this->is_checked[WHITE] = board.is_checked[WHITE];
 		this->enpessant = board.enpessant;
 		this->moves = board.moves;
+		
+		last_move[WHITE].from = 0;
+		last_move[WHITE].to = 0;
+		last_move[BLACK].from = 0;
+		last_move[BLACK].to = 0;
 	}
     Board() {
 		last_move[WHITE].from = 0;
@@ -84,6 +89,7 @@ public:
 	bool is_checked[2] = {false, false};
 	std::array<std::vector<Move>, 2> moves;
 	std::array<Move, 2> last_move;
+	std::array<uint, 2> num_of_pieces {16, 16};
 	
 	//std::array<std::array<std::vector<Move>, 6>, 2> pos;
 };

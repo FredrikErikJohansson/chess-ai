@@ -2,6 +2,7 @@
 #include <vector>
 #include <cmath>
 #include <algorithm>
+#include <cassert>
 
 #include "bitboards.h"
 #include "board.h"
@@ -29,10 +30,10 @@ public:
     Bitboard get_king_moves(bool color, Board*);
     Bitboard get_all_moves(bool color, Board*);
 
-    Bitboard under_attack(bool color);
+    Bitboard under_attack(bool color, Board *);
 
-    void calculate_all_moves();
-    Bitboard attacks_to_king(Bitboard bb, bool color);
+    void calculate_all_moves(Board*);
+    Bitboard attacks_to_king(Bitboard bb, bool color, Board*);
 
     bool check(Move&);
     // bool checkmate(bool color, Board*);

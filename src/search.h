@@ -19,12 +19,12 @@ public:
     }
     Search() {};
 
-    int evaluate(bool color);
+    int evaluate(bool color, Board* board);
     // int alpha_beta_max(int& alpha, int& beta, int depth_left, int&);
     // int alpha_beta_min(int& alpha, int& beta, int depth_left, int&);
-    int alpha_beta( int alpha, int beta, int depthleft, bool color, int&);
-    Move alpha_beta_first( int alpha, int beta, int depthleft, bool color, int&);
-    int quiesce( int alpha, int beta, bool color);
+    int alpha_beta( int alpha, int beta, int depthleft, bool color, int&, Board* board);
+    Move alpha_beta_first( int alpha, int beta, int depthleft, bool color, int&, Board* board);
+    int quiesce( int alpha, int beta, bool color, Board* board);
     //int alpha_beta(int depth, int& alpha, int& beta, bool color, int&);
 
 private:
