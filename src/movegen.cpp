@@ -8,7 +8,6 @@
 // Move has to be copy
 void Movegen::make_move(Move move, Board* board, bool from_check) {
     Bitboard from_to_bb = move.from ^ move.to;
-    if (from_to_bb == 0) return;
     board->pieces[move.color][move.type] ^= from_to_bb;
     // Since there was a move avaiable the player is not in check
     board->is_checked[move.color] = false; // TODO: Probably not correct
@@ -21,7 +20,7 @@ void Movegen::make_move(Move move, Board* board, bool from_check) {
     //if(capture_pos != 0) move.capture = true;
     
     if(capture_pos != 0 && !from_check) {
-        for(size_t capture_type = 0; capture_type < 6; ++capture_type) {
+        for(unsigned int capture_type = 0; capture_type < 6; ++capture_type) {
             if(move.color == WHITE) {
                 if((capture_pos & board->pieces[BLACK][capture_type]) != 0) {
                     board->pieces[BLACK][capture_type] ^= move.to;
@@ -78,7 +77,6 @@ void Movegen::make_move(Move move, Board* board, bool from_check) {
 }
 
 void Movegen::unmake_move(Board* board) {
-    if (board->history.size() < 1) return;
     Move move = board->history.top();
     Bitboard from_to_bb = move.from ^ move.to;
     board->pieces[move.color][move.type] ^= from_to_bb;
@@ -125,7 +123,7 @@ std::vector<Bitboard> Movegen::seperate_bitboards(Bitboard const& bb) {
     return res;
 }
 
-void Movegen::get_moves_for(Bitboard from, bool color, size_t type, Board* board) {
+void Movegen::get_moves_for(Bitboard from, bool color, unsigned int type, Board* board) {
     Move move;
     move.from = from;
     move.color = color;
@@ -167,8 +165,10 @@ void Movegen::get_moves_for(Bitboard from, bool color, size_t type, Board* board
         }
 
         // Check for self check and opponent check
-        if(this->check(move)) {
-            board->moves[move.color].push_back(move);
+        if(move.from != move.to) {
+            if(this->check(move)) {
+                board->moves[move.color].push_back(move);
+            }
         }
     }
 
@@ -491,8 +491,8 @@ Bitboard Movegen::under_attack(bool color, Board* board) {
 
  bool Movegen::check(Move& move) {
     bool prev_can_castle = board->can_castle[move.color];
-    size_t prev_white_pieces = board->num_of_pieces[WHITE];
-    size_t prev_black_pieces = board->num_of_pieces[BLACK];
+    unsigned int prev_white_pieces = board->num_of_pieces[WHITE];
+    unsigned int prev_black_pieces = board->num_of_pieces[BLACK];
     make_move(move, board, true);
 
     if(move.type == KING) {

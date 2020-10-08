@@ -24,8 +24,8 @@ struct Move {
 	bool castle = false;
 	bool check = false;
 	bool promotion = false;
-    size_t type;
-	size_t capture_type;
+    unsigned int type;
+	unsigned int capture_type;
 };
 
 class Board {
@@ -89,7 +89,7 @@ public:
 	bool is_checked[2] = {false, false};
 	std::array<std::vector<Move>, 2> moves;
 	std::array<Move, 2> last_move;
-	std::array<size_t, 2> num_of_pieces {16, 16};
+	std::array<uint, 2> num_of_pieces {16, 16};
 	
 	//std::array<std::array<std::vector<Move>, 6>, 2> pos;
 };
