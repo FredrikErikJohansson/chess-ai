@@ -60,7 +60,7 @@ int main() {
         int move_idx = 0;
         int iterations = 0;
         auto root_moves = chessBoard.moves[tmp_color].size();
-        uint i;
+        //uint i;
         // Sometime segfault (castle???)
         //if(tmp_color) {
             //#pragma omp parallel for schedule(dynamic, 1)// private(tmp_board, tmp_gen, tmp_search) 

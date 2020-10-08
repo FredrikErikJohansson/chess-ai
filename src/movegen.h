@@ -20,7 +20,7 @@ public:
     std::vector<Bitboard> seperate_bitboards(Bitboard const&);
 
     //Move get_pawn_moves(Bitboard bb, bool color, Board*);
-    void get_moves_for(Bitboard bb, bool color, uint type, Board*);
+    void get_moves_for(Bitboard bb, bool color, size_t type, Board*);
 
     Bitboard get_bishop_moves(Bitboard bb, bool color, Board*);
     Bitboard get_knight_moves(Bitboard bb, bool color, Board*);

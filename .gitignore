@@ -1,3 +1,10 @@
 *.d
 *.vscode
+*.vs
+/src/Debug
+/src/x64
+*.sln
+*.vcxproj
+*.filters
+*.user
 chess
