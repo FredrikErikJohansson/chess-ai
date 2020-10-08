@@ -47,11 +47,10 @@ public:
 	void print() const;
 	void print(Bitboard const&) const;
 	void print_visualization(Board const);
-	// short getRowFromChar(char letter);
-	// bool queryPiece(char column,short row, Bitboard board);
 
 	uint_fast16_t find_board(bool color, Bitboard pos);
 
+	// Common variables
 	std::stack<Move> history;
 	std::array<std::array<Bitboard, 6>, 2> pieces = {};
 	std::array<Bitboard, 2> enpessant = {0, 0};

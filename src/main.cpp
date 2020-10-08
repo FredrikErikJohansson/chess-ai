@@ -25,46 +25,52 @@ int main() {
 
         if(white_king_bb_pos.size() < 1) {
             std::cout << "\nBlack won!" << std::endl;
+            std::cout << "Press ENTER to continue: " << std::endl;
+            std::cin.get();
             break;
         } 
-        else if(black_king_bb_pos.size() < 1) {
+
+        if(black_king_bb_pos.size() < 1) {
             std::cout << "\nWhite won!" << std::endl;
+            std::cout << "Press ENTER to continue: " << std::endl;
+            std::cin.get();
             break;
         } 
-        else if(chessBoard.moves[is_white_turn].size() < 1) {
-            std::cout << "\n" << ((is_white_turn) ? "White " : "Black ") << " won!" << std::endl;
+
+        if(chessBoard.moves[is_white_turn].size() < 1) {
+            std::cout << "\n" << ((!is_white_turn) ? "White " : "Black ") << " won!" << std::endl;
+            std::cout << "Press ENTER to continue: " << std::endl;
+            std::cin.get();
             break;
         } 
-        else {
-            search.set_max_depth(6);
-            int alpha = INT32_MIN;
-            int beta = INT32_MAX;
-            int iterations = 0;
 
-            // Search
-            auto move = search.alpha_beta_first(alpha, beta, search.get_max_depth(), is_white_turn, iterations);
+        // Set search depth (ply)
+        search.set_max_depth(6);
+        int alpha = INT32_MIN;
+        int beta = INT32_MAX;
+        int iterations = 0;
 
-            std::cout << "Iterations: " << iterations << std::endl;
-            std::cout << "State stack size: " << chessBoard.history.size() << std::endl;
+        // Search
+        auto move = search.alpha_beta_first(alpha, beta, search.get_max_depth(), is_white_turn, iterations);
 
-            // Make found move
-            moveGen.make_move(move);
+        std::cout << "Iterations: " << iterations << std::endl;
+        std::cout << "State stack size: " << chessBoard.history.size() << std::endl;
 
-            std::cout << std::endl;
-            if(is_white_turn) std::cout << "White's move:" << std::endl;
-            else std::cout << "Black's move:" << std::endl;
-            chessBoard.print_visualization(chessBoard);
-            
-            turn++;
-        }
+        // Make found move
+        moveGen.make_move(move);
+
+        std::cout << std::endl;
+        if(is_white_turn) std::cout << "White's move:" << std::endl;
+        else std::cout << "Black's move:" << std::endl;
+        chessBoard.print_visualization(chessBoard);
+        
+        turn++;
         std::cout << std::endl;
         std::cout << "Press ENTER to continue: " << std::endl;
-
         std::cin.get();
     }
 
     while(chessBoard.history.size() > 0) {
-        Movegen moveGen = Movegen(&chessBoard);
         moveGen.unmake_move();
         chessBoard.print_visualization(chessBoard);
         std::cin.get();

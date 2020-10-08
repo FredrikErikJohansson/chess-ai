@@ -1,4 +1,3 @@
-*.d
 *.vscode
 *.vs
 /src/Debug

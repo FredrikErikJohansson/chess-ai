@@ -79,6 +79,7 @@ void Board::print_visualization(Board const board) {
         else if ((board.pieces[1][3] >> i) & 0b1) out_board[i]="| ♝ ";
         else if ((board.pieces[1][4] >> i) & 0b1) out_board[i]="| ♛ ";
         else if ((board.pieces[1][5] >> i) & 0b1) out_board[i]="| ♚ ";
+        else if ((board.history.top().from >> i) & 0b1) out_board[i] = "| + ";
         else out_board[i]="|   ";
     }
     
