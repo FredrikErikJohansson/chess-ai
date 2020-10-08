@@ -51,7 +51,8 @@ int main() {
             std::cout << !tmp_color << " won!" << std::endl;
             break;
         }
-        int depth = 6; // Even = defense, Uneven = aggressive
+        search.set_max_depth(6);
+        //int depth = 6; // Even = defense, Uneven = aggressive
         int alpha = INT32_MIN;
         int beta = INT32_MAX;
         int score = 0;
@@ -69,10 +70,9 @@ int main() {
                 // Board tmp_board(chessBoard);
                 // Movegen tmp_gen = Movegen(&tmp_board);
                 // Search tmp_search = Search(&tmp_board, &tmp_gen);
-                auto move = search.alpha_beta_first(alpha, beta, depth, tmp_color, iterations, &chessBoard);
+                auto move = search.alpha_beta_first(alpha, beta, search.get_max_depth(), tmp_color, iterations);
 
                 //chessBoard.last_move[tmp_color] = chessBoard.moves[tmp_color][move_idx];
-                std::cout << "asd";
                 //else move_idx = -search.alpha_beta_first(alpha, beta, depth-1, tmp_color, iterations);
                 // tmp_gen.calculate_all_moves();
                 // tmp_gen.make_move(chessBoard.moves[tmp_color][i], &tmp_board);
