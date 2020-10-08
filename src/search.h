@@ -19,13 +19,13 @@ public:
     }
     Search() {};
 
-    int evaluate(bool color, int depth_left);
-    // int alpha_beta_max(int& alpha, int& beta, int depth_left, int&);
-    // int alpha_beta_min(int& alpha, int& beta, int depth_left, int&);
-    int alpha_beta( int alpha, int beta, int depthleft, bool color, int&);
+    // Search from the root returning the best move
     Move alpha_beta_first( int alpha, int beta, int depthleft, bool color, int&);
-    int quiesce( int alpha, int beta, bool color, int depth_left);
-    //int alpha_beta(int depth, int& alpha, int& beta, bool color, int&);
+
+    int alpha_beta( int alpha, int beta, int depthleft, bool color, int&);
+    int evaluate(bool color, int depth_left);
+    int quiesce( int alpha, int beta, bool color, int depth_left, int&);
+
     void set_max_depth(int const& md) { max_depth = md; }
     int get_max_depth() const { return max_depth; }
 

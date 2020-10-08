@@ -1,22 +1,24 @@
 #include "search.h"
 
 int Search::evaluate(bool color, int depth_left) {
-    //int tmp_score = board->moves[color].size(); // Weight number of moves
     int tmp_score = 0;
 
     if(board->moves[color].size() < 1) {
-        if(movegen->attacks_to_king(board->pieces[color][KING], color, board) != 0) {
-            return (INT32_MAX/max_depth)*(depth_left + 1);
+        if(movegen->attacks_to_king(board->pieces[color][KING], color) != 0) {
+            return (INT32_MAX/max_depth)*(depth_left + 1); // Checkmate
         }
-        return 0;
+        return 0; // Draw
     }
+    
     for(int i = 0; i < 6; ++i) {
         Bitboard bb = board->pieces[color][i];
         int counter = 0;
         for (int row = 7; row >= 0; --row) {
             for (int col = 0; col <= 7; ++col) {
                 if (bb & (1ULL << ((row * 8) + col))) {
-                    tmp_score += piece_score[i];
+                    tmp_score += piece_score[i]; // Material score
+
+                    // Positional score
                     switch (i)
                     {
                     case 0:
@@ -49,177 +51,91 @@ int Search::evaluate(bool color, int depth_left) {
     return tmp_score;
 }
 
-// int Search::alpha_beta_max(int& alpha, int& beta, int depth_left, int& iterations) {
-//     if (depth_left == 0) return evaluate(WHITE);
-//     //int score = INT32_MIN;
-//     //int score;
-//     movegen->calculate_all_moves();
-//     for (auto move : board->moves[WHITE]) {
-//         movegen->make_move(move, board);
-//         movegen->calculate_all_moves();
-//         ++iterations;
-//         score = alpha_beta_min(alpha, beta, depth_left - 1, iterations);
-//         movegen->unmake_move(board);
-//         movegen->calculate_all_moves();
-//         if(score >= beta) return beta;   // fail hard beta-cutoff
-//         if(score > alpha) alpha = score; // alpha acts like max in MiniMax
-//     }
-//     return alpha;
-// }
-
-// int Search::alpha_beta_min(int& alpha, int& beta, int depth_left, int& iterations) {
-//     if (depth_left == 0) return -evaluate(BLACK);
-//     //int score = INT32_MAX;
-//     //int score;
-//     movegen->calculate_all_moves();
-//     for (auto move : board->moves[BLACK]) {
-//         movegen->make_move(move, board);
-//         movegen->calculate_all_moves();
-//         ++iterations;
-//         score = alpha_beta_max( alpha, beta, depth_left - 1, iterations);
-//         movegen->unmake_move(board);
-//         movegen->calculate_all_moves();
-//         if(score <= alpha) return alpha; // fail hard alpha-cutoff
-//         if(score < beta) beta = score; // beta acts like min in MiniMax
-//     }
-    
-//    return beta;
-// }
-
 int Search::alpha_beta( int alpha, int beta, int depth_left, bool color, int& tmp_iterations) {
-    movegen->calculate_all_moves(board);
-    // if(board->moves[color].size() < 1) {
-    //     //std::cout << "Terminal" << std::endl;
-    //     return (color) ? (depth_left*evaluate(color,board)) : -(depth_left*evaluate(color,board));
-    // } 
-    if(depth_left == 0 || board->moves[color].size() < 1) return quiesce(alpha, beta, color, depth_left);//(color) ? quiesce(alpha, beta, color) : -quiesce(alpha, beta, color);  
+    movegen->calculate_all_moves();
+
+    // Terminal node or maximum depth
+    if(depth_left == 0 || board->moves[color].size() < 1) {
+        return quiesce(alpha, beta, color, depth_left, tmp_iterations);
+    }
 
     for (auto move : board->moves[color]) {
-        movegen->make_move(move, board);
-        movegen->calculate_all_moves(board);
+        movegen->make_move(move);
+        movegen->calculate_all_moves();
         ++tmp_iterations;
         score = -alpha_beta( -alpha, -beta, depth_left - 1, !color, tmp_iterations);
-        movegen->unmake_move(board);
-        movegen->calculate_all_moves(board);
+        movegen->unmake_move();
+        movegen->calculate_all_moves();
         if(score >= beta) {
-            return score; // fail hard alpha-cutoff
+            return score;
         }
-        if(score > alpha) alpha = score; // beta acts like min in MiniMax
+        if(score > alpha) alpha = score;
     }
     
    return alpha;
 }
 
 Move Search::alpha_beta_first( int alpha, int beta, int depth_left, bool color, int& tmp_iterations) {
-    movegen->calculate_all_moves(board);
-    int tmp_score = 0;
+    movegen->calculate_all_moves();
+    int best_score = 0;
     int max_score = INT32_MIN;
     int counter = 0;
     int sign = (color) ? -1 : 1;
     std::vector<int> best_moves;
+
     for (auto move : board->moves[color]) {
-        movegen->make_move(move, board);
-        movegen->calculate_all_moves(board);
+        movegen->make_move(move);
+        movegen->calculate_all_moves();
         ++tmp_iterations;
-        tmp_score = sign * alpha_beta( -alpha, -beta, depth_left - 1, !color, tmp_iterations);
-        //std::cout << tmp_score << std::endl;
-        movegen->unmake_move(board);
-        movegen->calculate_all_moves(board);
+        best_score = sign * alpha_beta( -alpha, -beta, depth_left - 1, !color, tmp_iterations);
+        movegen->unmake_move();
+        movegen->calculate_all_moves();
 
-        std::cout << tmp_score << std::endl;
-
+        // Move repetition check
         if(board->moves[color][counter].from != board->last_move[color].to &&
         board->moves[color][counter].to != board->last_move[color].from) {
-            if(tmp_score > max_score) {
-                max_score = tmp_score;
+            if(best_score > max_score) { // New best move
+                max_score = best_score;
                 best_moves.clear();
                 best_moves.push_back(counter);
-            } else if(tmp_score == max_score) {
+            } else if(best_score == max_score) { // Equally good move
                 best_moves.push_back(counter);
             }
         }
         
         counter++;
     }
+
+    // Return random move if there are more than one
     if(best_moves.size() == 0) return board->moves[color][0]; 
     board->last_move[color] = board->moves[color][best_moves[rand() % best_moves.size()]];
     return board->last_move[color];
 }
 
-int Search::quiesce(int alpha, int beta, bool color, int depth_left) {
+int Search::quiesce(int alpha, int beta, bool color, int depth_left, int& tmp_iterations) {
     int stand_pat = ((color) ? evaluate(color, depth_left) : -evaluate(color, depth_left));
     if(stand_pat >= beta) return stand_pat;
     if(alpha < stand_pat) alpha = stand_pat;
 
-    movegen->calculate_all_moves(board);
-    //color = !color;
-    // std::vector<Move> capture_moves;
-    // std::back_insert_iterator< std::vector<Move>> back_it (capture_moves);
+    movegen->calculate_all_moves();
 
-    // for(auto move : board->moves[color])
-    //     if(move.capture) std:: cout << "Capture!!: " << std::endl;
-
-    //Bitboard attacked_pos = movegen->under_attack(color);
-    Bitboard attacking_pos = movegen->under_attack(!color, board);
-    //Bitboard attacking_pawns = board->pieces[!color][PAWN];
-    //Bitboard attacking_pawns =  if(((move.to << 9) & board->pieces[BLACK][PAWN]) != 0 ||
-    //            ((move.to << 7) & board->pieces[BLACK][PAWN]) != 0) {
-    //board->print(attacked_pos);
+    // Remove quiet moves
+    Bitboard attacking_pos = movegen->under_attack(!color);
     board->moves[color].erase(
     std::remove_if(board->moves[color].begin(), board->moves[color].end(),
-        [attacking_pos, color](const Move& move) { 
-            //Bitboard pawn_attack = ((((color) ? (move.to << 9) : (move.to >> 9)) & attacking_pawns) | (((color) ? (move.to << 7) : (move.to >> 7)) & attacking_pawns));
+        [attacking_pos](const Move& move) { 
             return (!((attacking_pos) & move.to)); 
-            }),
-    board->moves[color].end());
+        }), board->moves[color].end());
 
-    // board->moves[!color].erase(
-    // std::remove_if(board->moves[!color].begin(), board->moves[!color].end(),
-    //     [](const Move& move) { return !move.capture; }),
-    // board->moves[!color].end());
-
-    //for(int i = 0; i < 2; i++) {
     for(auto move : board->moves[color])  {
-        //if(move.capture) 
-        movegen->make_move(move, board);
-        movegen->calculate_all_moves(board);
-        score = -quiesce(-beta, -alpha, !color, depth_left);
-        movegen->unmake_move(board);
-        movegen->calculate_all_moves(board);
+        movegen->make_move(move);
+        movegen->calculate_all_moves();
+        ++tmp_iterations;
+        score = -quiesce(-beta, -alpha, !color, depth_left, tmp_iterations);
+        movegen->unmake_move();
+        movegen->calculate_all_moves();
         if(score >= beta) return score;
         if(score > alpha) alpha = score;
     }
-    //}
     return alpha;
 }
-
-
-
-// int Search::alpha_beta(int depth, int& alpha, int& beta, bool color, int& iterations) {
-//     movegen->calculate_all_moves();
-//     if (depth == 0 || board->moves[color].size() < 1) return evaluate(color);
-//     if (color) {
-//         for (auto move : board->moves[WHITE]) {
-//             movegen->make_move(move, board);
-//             movegen->calculate_all_moves();
-//             ++iterations;
-//             alpha = std::max(alpha, alpha_beta(depth-1, alpha, beta, BLACK, iterations));
-//             movegen->unmake_move(board);
-//             movegen->calculate_all_moves();
-//             if(alpha >= beta) break;
-//         }
-//         return alpha;
-//     }
-//    else {
-//        for (auto move : board->moves[BLACK]) {
-//             movegen->make_move(move, board);
-//             movegen->calculate_all_moves();
-//             ++iterations;
-//             beta = std::min(beta, alpha_beta(depth-1, alpha, beta, WHITE, iterations));
-//             movegen->unmake_move(board);
-//             movegen->calculate_all_moves();
-//             if(beta <= alpha) break;
-//         }
-//         return beta;
-//    }
-// }

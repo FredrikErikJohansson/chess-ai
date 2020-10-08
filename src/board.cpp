@@ -63,7 +63,7 @@ void Board::print(Bitboard const& b) const {
 }
 
 void Board::print_visualization(Board const board) {
-    std::cout << "Current Board:\n";
+    std::cout << "Current board:\n";
     std::string out_board[64];
     for (int i=0; i<64; i++) {
         if      ((board.pieces[0][0] >> i) & 0b1) out_board[i]="| ♙ ";
