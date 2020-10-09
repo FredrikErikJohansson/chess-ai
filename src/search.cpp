@@ -5,7 +5,7 @@ int Search::evaluate(bool color, int depth_left) {
 
     if(board->moves[color].size() < 1) {
         if(movegen->attacks_to_king(board->pieces[color][KING], color) != 0) {
-            return (INT32_MAX/max_depth)*(depth_left + 1); // Checkmate
+            return (INT32_MAX/2) + depth_left; // Checkmate
         }
         return 0; // Draw
     }
@@ -51,43 +51,20 @@ int Search::evaluate(bool color, int depth_left) {
     return tmp_score;
 }
 
-int Search::alpha_beta( int alpha, int beta, int depth_left, bool color, int& tmp_iterations) {
-    movegen->calculate_all_moves();
-
-    // Terminal node or maximum depth
-    if(depth_left == 0 || board->moves[color].size() < 1) {
-        return quiesce(alpha, beta, color, depth_left, tmp_iterations);
-    }
-
-    for (auto move : board->moves[color]) {
-        movegen->make_move(move);
-        movegen->calculate_all_moves();
-        ++tmp_iterations;
-        score = -alpha_beta( -alpha, -beta, depth_left - 1, !color, tmp_iterations);
-        movegen->unmake_move();
-        movegen->calculate_all_moves();
-        if(score >= beta) {
-            return score;
-        }
-        if(score > alpha) alpha = score;
-    }
-    
-   return alpha;
-}
-
 Move Search::alpha_beta_first( int alpha, int beta, int depth_left, bool color, int& tmp_iterations) {
     movegen->calculate_all_moves();
     int best_score = 0;
     int max_score = INT32_MIN;
     int counter = 0;
-    int sign = (color) ? -1 : 1;
+    //int sign = (color) ? -1 : -1;
     std::vector<int> best_moves;
 
     for (auto move : board->moves[color]) {
         movegen->make_move(move);
         movegen->calculate_all_moves();
         ++tmp_iterations;
-        best_score = sign * alpha_beta( -alpha, -beta, depth_left - 1, !color, tmp_iterations);
+        best_score = -alpha_beta( -alpha, -beta, depth_left - 1, !color, tmp_iterations);
+        std::cout << best_score << std::endl;
         movegen->unmake_move();
         movegen->calculate_all_moves();
 
@@ -108,8 +85,40 @@ Move Search::alpha_beta_first( int alpha, int beta, int depth_left, bool color, 
 
     // Return random move if there are more than one
     if(best_moves.size() == 0) return board->moves[color][0]; 
-    board->last_move[color] = board->moves[color][best_moves[rand() % best_moves.size()]];
+    board->last_move[color] = board->moves[color][Zobrist::random64() % best_moves.size()];
     return board->last_move[color];
+}
+
+int Search::alpha_beta( int alpha, int beta, int depth_left, bool color, int& tmp_iterations) {
+    movegen->calculate_all_moves();
+
+    if ((score = tt->probe_hash(depth_left, alpha, beta, color)) != valUNKNOWN) {
+        return score;
+    }
+
+    // Terminal node or maximum depth
+    if(depth_left == 0 || board->moves[color].size() < 1) {
+        score = quiesce(alpha, beta, color, depth_left, tmp_iterations);
+        tt->record_hash(depth_left, score, hashfEXACT, color);
+        return score;
+    }
+
+    for (auto move : board->moves[color]) {
+        movegen->make_move(move);
+        movegen->calculate_all_moves();
+        ++tmp_iterations;
+        score = -alpha_beta( -alpha, -beta, depth_left - 1, !color, tmp_iterations);
+        movegen->unmake_move();
+        movegen->calculate_all_moves();
+        if(score >= beta) {
+            tt->record_hash(depth_left, score, hashfEXACT, color);
+            return score; // fail-soft beta-cutoff
+        }
+        if(score > alpha) {
+            alpha = score;
+        }
+    }
+    return alpha;
 }
 
 int Search::quiesce(int alpha, int beta, bool color, int depth_left, int& tmp_iterations) {
@@ -131,7 +140,7 @@ int Search::quiesce(int alpha, int beta, bool color, int depth_left, int& tmp_it
         movegen->make_move(move);
         movegen->calculate_all_moves();
         ++tmp_iterations;
-        score = -quiesce(-beta, -alpha, !color, depth_left, tmp_iterations);
+        score = quiesce(-beta, -alpha, !color, depth_left, tmp_iterations);
         movegen->unmake_move();
         movegen->calculate_all_moves();
         if(score >= beta) return score;

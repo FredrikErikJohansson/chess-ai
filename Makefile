@@ -1,7 +1,7 @@
 SRC := ./src
 SRCS := $(wildcard $(SRC)/*.cpp)
 HEADERS := $(wildcard $(SRC)/*.h)
-CXX = clang++
+CXX = g++
 CXXFLAGS := -O3 -Wall -Wextra
 
 all: chess
@@ -11,4 +11,4 @@ chess: $(SRCS) $(HEADERS)
 
 .PHONY: clean
 clean:
-	$(RM) chess *.d
+	$(RM) chess

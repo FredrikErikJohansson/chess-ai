@@ -1,12 +1,16 @@
 #include "board.h"
 #include "movegen.h"
 #include "search.h"
+#include "tt.h"
 
 int main() {
     Board chessBoard;
     chessBoard.initialize();
     Movegen moveGen = Movegen(&chessBoard);
-    Search search = Search(&chessBoard, &moveGen);
+    TT table = TT(&chessBoard);
+    table.init_hash(512);
+    Zobrist::init_keys();
+    Search search = Search(&chessBoard, &moveGen, &table);
     int turn = 0;
 
     // Game loop
@@ -45,7 +49,7 @@ int main() {
         } 
 
         // Set search depth (ply)
-        search.set_max_depth(6);
+        search.set_max_depth(8);
         int alpha = INT32_MIN;
         int beta = INT32_MAX;
         int iterations = 0;
@@ -70,9 +74,5 @@ int main() {
         std::cin.get();
     }
 
-    while(chessBoard.history.size() > 0) {
-        moveGen.unmake_move();
-        chessBoard.print_visualization(chessBoard);
-        std::cin.get();
-    }
+    return 1;
 }
