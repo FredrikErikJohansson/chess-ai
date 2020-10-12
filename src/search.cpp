@@ -2,20 +2,15 @@
 
 int Search::evaluate(bool color, int depth_left) {
     int tmp_score = 0;
-
-    if(board->moves[color].size() < 1) {
-        if(movegen->attacks_to_king(board->pieces[color][KING], color) != 0) {
-            return (INT32_MAX/max_depth)*(depth_left + 1); // Checkmate
-        }
-        return 0; // Draw
-    }
     
     for(int i = 0; i < 6; ++i) {
         Bitboard bb = board->pieces[color][i];
+        Bitboard bb_opp = board->pieces[!color][i];
         int counter = 0;
         for (int row = 7; row >= 0; --row) {
             for (int col = 0; col <= 7; ++col) {
-                if (bb & (1ULL << ((row * 8) + col))) {
+                if (bb_opp & (1ULL << counter)) tmp_score -= piece_score[i];
+                if (bb & (1ULL << counter)) {
                     tmp_score += piece_score[i]; // Material score
 
                     // Positional score
@@ -44,8 +39,8 @@ int Search::evaluate(bool color, int depth_left) {
                         break;
                     }
                 }
-            }
             counter++;
+            }
         }
     }
     return tmp_score;
@@ -53,26 +48,36 @@ int Search::evaluate(bool color, int depth_left) {
 
 int Search::alpha_beta( int alpha, int beta, int depth_left, bool color, int& tmp_iterations) {
     movegen->calculate_all_moves();
+    int score = INT32_MIN;
+
+    if(board->moves[color].size() < 1) {
+        if(movegen->attacks_to_king(board->pieces[color][KING], color) != 0) {
+            //std::cout << "CHECK" << std::endl;
+            return -((INT32_MAX/2) + (depth_left)); // Self checkmate
+        }
+        return 0;
+    }
 
     // Terminal node or maximum depth
     if(depth_left == 0 || board->moves[color].size() < 1) {
-        return quiesce(alpha, beta, color, depth_left, tmp_iterations);
+        return quiesce(alpha, beta, color, depth_left+1, tmp_iterations);
     }
 
-    for (auto move : board->moves[color]) {
-        movegen->make_move(move);
+    for(size_t i = 0; i < board->moves[color].size(); ++i) {
+        movegen->make_move(board->moves[color][i]);
         movegen->calculate_all_moves();
         ++tmp_iterations;
-        score = -alpha_beta( -alpha, -beta, depth_left - 1, !color, tmp_iterations);
+        score = std::max(score, -alpha_beta( -alpha, -beta, depth_left - 1, !color, tmp_iterations));
         movegen->unmake_move();
         movegen->calculate_all_moves();
-        if(score >= beta) {
-            return score;
+        alpha = std::max(alpha, score);
+        if(alpha >= beta) {
+            break;
         }
-        if(score > alpha) alpha = score;
+        //if(score > alpha) alpha = score;
     }
     
-   return alpha;
+   return score;
 }
 
 Move Search::alpha_beta_first( int alpha, int beta, int depth_left, bool color, int& tmp_iterations) {
@@ -80,16 +85,18 @@ Move Search::alpha_beta_first( int alpha, int beta, int depth_left, bool color, 
     int best_score = 0;
     int max_score = INT32_MIN;
     int counter = 0;
-    int sign = (color) ? -1 : 1;
+    //int sign = (color) ? -1 : 1;
     std::vector<int> best_moves;
 
-    for (auto move : board->moves[color]) {
-        movegen->make_move(move);
+    for(size_t i = 0; i < board->moves[color].size(); ++i) {
+        movegen->make_move(board->moves[color][i]);
         movegen->calculate_all_moves();
         ++tmp_iterations;
-        best_score = sign * alpha_beta( -alpha, -beta, depth_left - 1, !color, tmp_iterations);
+        best_score = -alpha_beta( -alpha, -beta, depth_left - 1, !color, tmp_iterations);
         movegen->unmake_move();
         movegen->calculate_all_moves();
+
+        //std::cout << best_score << std::endl;
 
         // Move repetition check
         if(board->moves[color][counter].from != board->last_move[color].to &&
@@ -113,29 +120,51 @@ Move Search::alpha_beta_first( int alpha, int beta, int depth_left, bool color, 
 }
 
 int Search::quiesce(int alpha, int beta, bool color, int depth_left, int& tmp_iterations) {
-    int stand_pat = ((color) ? evaluate(color, depth_left) : -evaluate(color, depth_left));
-    if(stand_pat >= beta) return stand_pat;
-    if(alpha < stand_pat) alpha = stand_pat;
+    // int stand_pat = evaluate(color, depth_left);//((color) ? evaluate(color, depth_left) : -evaluate(color, depth_left));
+    // if(stand_pat >= beta) return stand_pat;
+    // if(alpha < stand_pat) alpha = stand_pat;
+
+    // if(board->moves[color].size() < 1) {
+    //     if(movegen->attacks_to_king(board->pieces[color][KING], color) != 0) {
+    //         std::cout << "CHECK" << std::endl;
+    //         return -((INT32_MAX/2) + (depth_left));
+    //     }
+    // }
+    int score = INT32_MIN;
+    // Terminal node or maximum depth
+
+    if(board->moves[color].size() < 1) {
+        if(movegen->attacks_to_king(board->pieces[color][KING], color) != 0) {
+            //std::cout << "CHECK" << std::endl;
+            return -((INT32_MAX/2) + (depth_left)); // Self checkmate
+        }
+        return 0;
+    }
+
+    if(depth_left == 0 || board->moves[color].size() < 1) {
+        return evaluate(color, depth_left);
+    }
 
     movegen->calculate_all_moves();
 
-    // Remove quiet moves
     Bitboard attacking_pos = movegen->under_attack(!color);
-    board->moves[color].erase(
-    std::remove_if(board->moves[color].begin(), board->moves[color].end(),
-        [attacking_pos](const Move& move) { 
-            return (!((attacking_pos) & move.to)); 
-        }), board->moves[color].end());
 
-    for(auto move : board->moves[color])  {
-        movegen->make_move(move);
+    for(size_t i = 0; i < board->moves[color].size(); ++i) {
+
+        if((board->moves[color][i].to & attacking_pos) == 0) continue;
+
+        movegen->make_move(board->moves[color][i]);
         movegen->calculate_all_moves();
         ++tmp_iterations;
-        score = -quiesce(-beta, -alpha, !color, depth_left, tmp_iterations);
+        score = std::max(score, -quiesce(-beta, -alpha, !color, depth_left-1, tmp_iterations));
         movegen->unmake_move();
         movegen->calculate_all_moves();
-        if(score >= beta) return score;
-        if(score > alpha) alpha = score;
+        alpha = std::max(alpha, score);
+        if(alpha >= beta) {
+            break;
+        }
     }
-    return alpha;
+
+    if(score == INT32_MIN) return evaluate(color, depth_left);
+    return score;
 }
