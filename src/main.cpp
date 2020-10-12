@@ -45,7 +45,7 @@ int main() {
         } 
 
         // Set search depth (ply)
-        search.set_max_depth(6);
+        search.set_max_depth(4);
         int alpha = INT32_MIN;
         int beta = INT32_MAX;
         int iterations = 0;

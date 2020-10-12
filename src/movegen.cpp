@@ -173,13 +173,13 @@ void Movegen::get_moves_for(Bitboard from, bool color, unsigned int type) {
     }
 
     // Sort by captures
-    // Bitboard attacking_pos = under_attack(!color);
-    // std::sort( board->moves[move.color].begin(), board->moves[move.color].end(), [attacking_pos]( const Move& lhs, const Move& rhs )
-    // {   
-    //     if ((lhs.to & attacking_pos)  > (rhs.to & attacking_pos)) return true;
-    //     else if (lhs.type > rhs.type) return true;
-    //     else return false;
-    // });
+    Bitboard attacking_pos = under_attack(!color);
+    std::sort( board->moves[move.color].begin(), board->moves[move.color].end(), [attacking_pos]( const Move& lhs, const Move& rhs )
+    {   
+        //if ((lhs.to & attacking_pos)  > (rhs.to & attacking_pos)) return true;
+        return (lhs.type > rhs.type);
+        //else return false;
+    });
 }
 
 
