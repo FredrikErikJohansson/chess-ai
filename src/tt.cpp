@@ -38,10 +38,10 @@ int TT::probe_hash(int depth, int alpha, int beta, bool color) {
         if (phashe->depth >= depth) {
             if (phashe->flags == hashfEXACT)
                 return phashe->value;
-            // if ((phashe->flags == hashfALPHA) && (phashe->value <= alpha))
-            //     return alpha;
-            // if ((phashe->flags == hashfBETA) && (phashe->value >= beta))
-            //     return beta;
+            if ((phashe->flags == hashfALPHA) && (phashe->value <= alpha))
+                return alpha;
+            if ((phashe->flags == hashfBETA) && (phashe->value >= beta))
+                return beta;
         }
 
         //RememberBestMove();
