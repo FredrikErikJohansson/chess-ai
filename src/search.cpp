@@ -123,17 +123,18 @@ int Search::alpha_beta( int alpha, int beta, int depth_left, bool color, int& tm
         //return (piece_score[lhs.type] < piece_score[rhs.type]);
     });
 
-    // if ((score = tt->probe_hash(depth_left, alpha, beta, color)) != valUNKNOWN) {
-    //     return score;
-    // }
+    int score = tt->probe_hash(depth_left, alpha, beta, color);
+    if (score != valUNKNOWN) {
+        return score;
+    }
 
     int best_score = INT32_MIN;
-    int score = INT32_MIN;
+    score = INT32_MIN;
 
     if(board->moves[color].size() < 1) {
         if(movegen->attacks_to_king(board->pieces[color][KING], color) != 0) {
             score = -((INT32_MAX/2) + (depth_left));
-            //tt->record_hash(depth_left, score, hashfEXACT, color);
+            tt->record_hash(depth_left, score, hashfEXACT, color);
             return score; // Self checkmate
         }
     }
@@ -141,7 +142,7 @@ int Search::alpha_beta( int alpha, int beta, int depth_left, bool color, int& tm
     if(board->moves[!color].size() < 1) {
         if(movegen->attacks_to_king(board->pieces[!color][KING], !color) != 0) {
             score = ((INT32_MAX/2) + (depth_left));
-            //tt->record_hash(depth_left, score, hashfEXACT, color);
+            tt->record_hash(depth_left, score, hashfEXACT, color);
             return score; // Opp checkmate
         }
     }
@@ -149,7 +150,7 @@ int Search::alpha_beta( int alpha, int beta, int depth_left, bool color, int& tm
     // Terminal node or maximum depth
     if(depth_left == 0 || board->moves[color].size() < 1) {
         score = quiesce(alpha, beta, color, depth_left+4, tmp_iterations);
-        //tt->record_hash(depth_left, score, hashfEXACT, color);
+        tt->record_hash(depth_left, score, hashfEXACT, color);
         return score;
     }
 
@@ -193,18 +194,19 @@ int Search::quiesce(int alpha, int beta, bool color, int depth_left, int& tmp_it
     
     movegen->calculate_all_moves();
 
-    if ((score = tt->probe_hash(depth_left, alpha, beta, color)) != valUNKNOWN) {
+    int score = tt->probe_hash(depth_left, alpha, beta, color);
+    if (score != valUNKNOWN) {
         return score;
     }
 
     int best_score = INT32_MIN;
-    int score = INT32_MIN;
+    score = INT32_MIN;
 
     // Terminal node or maximum depth
     if(board->moves[color].size() < 1) {
         if(movegen->attacks_to_king(board->pieces[color][KING], color) != 0) {
             score = -((INT32_MAX/2) + (depth_left));
-            //tt->record_hash(depth_left, score, hashfEXACT, color);
+            tt->record_hash(depth_left, score, hashfEXACT, color);
             return score; // Self checkmate
         }
     }
@@ -212,7 +214,7 @@ int Search::quiesce(int alpha, int beta, bool color, int depth_left, int& tmp_it
     if(board->moves[!color].size() < 1) {
         if(movegen->attacks_to_king(board->pieces[!color][KING], !color) != 0) {
             score = ((INT32_MAX/2) + (depth_left));
-            //tt->record_hash(depth_left, score, hashfEXACT, color);
+            tt->record_hash(depth_left, score, hashfEXACT, color);
             return score; // Opp checkmate
         }
     }
@@ -235,7 +237,7 @@ int Search::quiesce(int alpha, int beta, bool color, int depth_left, int& tmp_it
 
     if(depth_left == 0) {
         score = evaluate(color, 0);
-        //tt->record_hash(depth_left, score, hashfEXACT, color);
+        tt->record_hash(depth_left, score, hashfEXACT, color);
         return score;
     }
 
@@ -287,7 +289,7 @@ int Search::quiesce(int alpha, int beta, bool color, int depth_left, int& tmp_it
 
     if(best_score == INT32_MIN) {
         best_score = evaluate(color, 0);
-        //tt->record_hash(depth_left, score, hashfEXACT, color);
+        tt->record_hash(depth_left, score, hashfEXACT, color);
         return best_score;
     }
     return best_score;
