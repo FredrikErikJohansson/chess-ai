@@ -6,44 +6,67 @@ int Search::evaluate(bool color) {
     for(int i = 0; i < 6; ++i) {
         Bitboard bb = board->pieces[color][i];
         Bitboard bb_opp = board->pieces[!color][i];
-        int counter = 0;
         for (int row = 7; row >= 0; --row) {
             for (int col = 0; col <= 7; ++col) {
-                if (bb_opp & (1ULL << counter)) tmp_score -= piece_score[i];
+                int counter = ((row * 8) + col);
                 if (bb & (1ULL << counter)) {
                     tmp_score += piece_score[i]; // Material score
-
+                    
                     // Positional score
                     switch (i)
                     {
                     case 0:
                         tmp_score += pawn_square_values[(color) ? counter : 63 - counter];
-                        tmp_score -= pawn_square_values[(!color) ? counter : 63 - counter];
                         break;
                     case 1:
-                        tmp_score += rook_square_values[(color) ? counter : 63 - counter];
-                        tmp_score -= rook_square_values[(!color) ? counter : 63 - counter];
+                        tmp_score += knight_square_values[(color) ? counter : 63 - counter];
                         break;
                     case 2:
-                        tmp_score += knight_square_values[(color) ? counter : 63 - counter];
-                        tmp_score -= knight_square_values[(!color) ? counter : 63 - counter];
+                        tmp_score += bishop_square_values[(color) ? counter : 63 - counter];
                         break;
                     case 3:
-                        tmp_score += bishop_square_values[(color) ? counter : 63 - counter];
-                        tmp_score -= bishop_square_values[(!color) ? counter : 63 - counter];
+                        tmp_score += rook_square_values[(color) ? counter : 63 - counter];
                         break;
                     case 4:
                         tmp_score += queen_square_values[(color) ? counter : 63 - counter];
-                        tmp_score -= queen_square_values[(!color) ? counter : 63 - counter];
                         break;
                     case 5:
                         tmp_score += king_early_square_values[(color) ? counter : 63 - counter];
+                        break;
+                    
+                    default:
+                        break;
+                    }
+                }
+                if (bb_opp & (1ULL << counter)) {
+                    tmp_score -= piece_score[i]; // Material score
+
+                    // Positional score
+                    switch (i)
+                    {
+                    case 0:
+                        tmp_score -= pawn_square_values[(!color) ? counter : 63 - counter];
+                        break;
+                    case 1:
+                        tmp_score -= knight_square_values[(!color) ? counter : 63 - counter];
+                        break;
+                    case 2:
+                        tmp_score -= bishop_square_values[(!color) ? counter : 63 - counter];
+                        break;
+                    case 3:
+                        tmp_score -= rook_square_values[(!color) ? counter : 63 - counter];
+                        break;
+                    case 4:
+                        tmp_score -= queen_square_values[(!color) ? counter : 63 - counter];
+                        break;
+                    case 5:
                         tmp_score -= king_early_square_values[(!color) ? counter : 63 - counter];
                         break;
                     
                     default:
                         break;
                     }
+                    
                 }
             counter++;
             }
