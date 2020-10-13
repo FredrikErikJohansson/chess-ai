@@ -176,8 +176,13 @@ void Movegen::get_moves_for(Bitboard from, bool color, unsigned int type) {
     Bitboard attacking_pos = under_attack(!color);
     std::sort( board->moves[move.color].begin(), board->moves[move.color].end(), [attacking_pos]( const Move& lhs, const Move& rhs )
     {   
-        //if ((lhs.to & attacking_pos)  > (rhs.to & attacking_pos)) return true;
-        return (lhs.type > rhs.type);
+        if((lhs.to & attacking_pos) == 0 && (rhs.to & attacking_pos) == 0) {
+            return (lhs.type < rhs.type);
+        }
+
+        return ((lhs.to & attacking_pos) == 0 && (rhs.to & attacking_pos) != 0);
+        //else return ( lhs.type > rhs.type);
+        //return (lhs.type < rhs.type);
         //else return false;
     });
 }
@@ -307,8 +312,8 @@ Bitboard Movegen::under_attack(bool color) {
 
  Bitboard Movegen::get_all_moves(bool color) {
  	Bitboard total_moves = 0;
-    for(auto move : board->moves[color]) {
-        total_moves |= move.to;
+    for(size_t i = 0; i < board->moves[color].size(); ++i) {
+        total_moves |= board->moves[color][i].to;
     }
     
  	return total_moves;
@@ -375,6 +380,7 @@ Bitboard Movegen::under_attack(bool color) {
         this->get_moves_for(p, BLACK, KING);
     }
  }
+
 
  Bitboard Movegen::attacks_to_king(Bitboard king, bool color) {
     Bitboard xray_rooks = this->get_rook_moves(king, color );

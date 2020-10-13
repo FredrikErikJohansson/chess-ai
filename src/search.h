@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <cmath>
 
 #define PAWN_SCORE 100
 #define KNIGHT_SCORE 320
@@ -26,6 +27,8 @@ public:
     int evaluate(bool color, int depth_left);
     int quiesce( int alpha, int beta, bool color, int depth_left, int&);
 
+    int find_type(Move move);
+
     void set_max_depth(int const& md) { max_depth = md; }
     int get_max_depth() const { return max_depth; }
 
@@ -34,7 +37,7 @@ private:
     Movegen* movegen;
     int max_depth = 6;
     int score = 0;
-    std::array<int, 6> piece_score = { PAWN_SCORE, ROOK_SCORE, KNIGHT_SCORE, BISHOP_SCORE, QUEEN_SCORE, KING_SCORE };
+    std::array<int, 6> piece_score = { PAWN_SCORE, KNIGHT_SCORE, BISHOP_SCORE, ROOK_SCORE, QUEEN_SCORE, KING_SCORE };
 
     int pawn_square_values[64] = {
         0,  0,  0,  0,  0,  0,  0,  0,

@@ -32,6 +32,7 @@ public:
     Bitboard under_attack(bool color);
 
     void calculate_all_moves();
+    void move_order();
     Bitboard attacks_to_king(Bitboard bb, bool color);
 
     bool check(Move&);

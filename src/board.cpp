@@ -67,16 +67,16 @@ void Board::print_visualization(Board const board) {
     std::string out_board[64];
     for (int i=0; i<64; i++) {
         if      ((board.pieces[0][0] >> i) & 0b1) out_board[i]="| ♙ ";
-        else if ((board.pieces[0][1] >> i) & 0b1) out_board[i]="| ♖ ";
-        else if ((board.pieces[0][2] >> i) & 0b1) out_board[i]="| ♘ ";
-        else if ((board.pieces[0][3] >> i) & 0b1) out_board[i]="| ♗ ";
+        else if ((board.pieces[0][1] >> i) & 0b1) out_board[i]="| ♘ ";
+        else if ((board.pieces[0][2] >> i) & 0b1) out_board[i]="| ♗ ";
+        else if ((board.pieces[0][3] >> i) & 0b1) out_board[i]="| ♖ ";
         else if ((board.pieces[0][4] >> i) & 0b1) out_board[i]="| ♕ ";
         else if ((board.pieces[0][5] >> i) & 0b1) out_board[i]="| ♔ ";
 
         else if ((board.pieces[1][0] >> i) & 0b1) out_board[i]="| ♟ ";
-        else if ((board.pieces[1][1] >> i) & 0b1) out_board[i]="| ♜ ";
-        else if ((board.pieces[1][2] >> i) & 0b1) out_board[i]="| ♞ ";
-        else if ((board.pieces[1][3] >> i) & 0b1) out_board[i]="| ♝ ";
+        else if ((board.pieces[1][1] >> i) & 0b1) out_board[i]="| ♞ ";
+        else if ((board.pieces[1][2] >> i) & 0b1) out_board[i]="| ♝ ";
+        else if ((board.pieces[1][3] >> i) & 0b1) out_board[i]="| ♜ ";
         else if ((board.pieces[1][4] >> i) & 0b1) out_board[i]="| ♛ ";
         else if ((board.pieces[1][5] >> i) & 0b1) out_board[i]="| ♚ ";
         else if ((board.history.top().from >> i) & 0b1) out_board[i] = "| + ";
