@@ -23,22 +23,24 @@ public:
     Search() {};
 
     // Search from the root returning the best move
-    Move alpha_beta_first( int alpha, int beta, int depthleft, bool color, int&);
+    Move alpha_beta_first( int alpha, int beta, int depthleft, bool color, int&, int&, int&);
 
-    int alpha_beta( int alpha, int beta, int depthleft, bool color, int&);
+    int alpha_beta( int alpha, int beta, int depthleft, bool color, int&, int&, int&);
     int evaluate(bool color, int depth_left);
-    int quiesce( int alpha, int beta, bool color, int depth_left, int&);
+    int quiesce( int alpha, int beta, bool color, int depth_left, int&, int&, int&);
 
-    int find_type(Move move);
+    int find_attacked_type(Move const& move);
 
     void set_max_depth(int const& md) { max_depth = md; }
     int get_max_depth() const { return max_depth; }
+    void set_q_max_depth(int const& qmd) { q_max_depth = qmd; }
 
 private:
     Board* board;
     Movegen* movegen;
     TT* tt;
     int max_depth = 6;
+    int q_max_depth = 2;
     int score = 0;
     std::array<int, 6> piece_score = { PAWN_SCORE, KNIGHT_SCORE, BISHOP_SCORE, ROOK_SCORE, QUEEN_SCORE, KING_SCORE };
 

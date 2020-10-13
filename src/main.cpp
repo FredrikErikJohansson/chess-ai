@@ -3,6 +3,8 @@
 #include "search.h"
 #include "tt.h"
 
+#include <chrono>
+
 int main() {
     Board chessBoard;
     chessBoard.initialize();
@@ -16,10 +18,8 @@ int main() {
     // Game loop
     while(1) { 
         moveGen.calculate_all_moves();
-        std::cout << "White move count: " << chessBoard.moves[WHITE].size() << std::endl;
-        std::cout << "Black move count: " << chessBoard.moves[BLACK].size() << std::endl;
-        std::cout << "White piece count: " << chessBoard.num_of_pieces[WHITE] << std::endl;
-        std::cout << "Black piece count: " << chessBoard.num_of_pieces[BLACK] << std::endl;
+        std::cout << "W move count: " << chessBoard.moves[WHITE].size() << std::endl;
+        std::cout << "B move count: " << chessBoard.moves[BLACK].size() << std::endl;
         
         bool is_white_turn = false;
         if(turn % 2 == 0) is_white_turn = true;
@@ -50,14 +50,22 @@ int main() {
 
         // Set search depth (ply)
         search.set_max_depth(4);
+        search.set_q_max_depth(3);
         int alpha = INT32_MIN;
         int beta = INT32_MAX;
         int iterations = 0;
+        int cutoffs = 0;
+        int in_tt = 0;
 
-        // Search
-        auto move = search.alpha_beta_first(alpha, beta, search.get_max_depth(), is_white_turn, iterations);
+        // Search and measure time
+        auto begin = std::chrono::high_resolution_clock::now();
+        auto move = search.alpha_beta_first(alpha, beta, search.get_max_depth(), is_white_turn, iterations, cutoffs, in_tt);
+        auto end = std::chrono::high_resolution_clock::now();
 
         std::cout << "Iterations: " << iterations << std::endl;
+        std::cout << "Cutoffs: " << cutoffs << std::endl;
+        std::cout << "Found in tt: " << in_tt << std::endl;
+        std::cout << "Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-begin).count() << "ms" << std::endl;
         std::cout << "State stack size: " << chessBoard.history.size() << std::endl;
 
         // Make found move
