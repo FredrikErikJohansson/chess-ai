@@ -54,7 +54,7 @@ int main() {
         if(!is_white_turn || !is_player) {
             // Set search depth (ply)
             search.set_max_depth(4);
-            search.set_q_max_depth(3);
+            search.set_q_max_depth(4);
             int alpha = INT32_MIN;
             int beta = INT32_MAX;
             int iterations = 0;

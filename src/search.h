@@ -40,7 +40,7 @@ private:
     Movegen* movegen;
     TT* tt;
     int max_depth = 4;
-    int q_max_depth = 3;
+    int q_max_depth = 4;
     int score = 0;
     std::array<int, 6> piece_score = { PAWN_SCORE, KNIGHT_SCORE, BISHOP_SCORE, ROOK_SCORE, QUEEN_SCORE, KING_SCORE };
 
