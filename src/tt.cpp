@@ -19,7 +19,7 @@ void TT::init_hash(int size){
     std::cout << "Hash Table size: " << num_entries * sizeof(HASHE)/0x100000 << " MB" << std::endl;
 }
 
-int TT::probe_hash(int depth, int alpha, int beta, bool color) {
+int TT::probe_hash(int depth, bool color) {
 
     HASHE* phashe = &table[Zobrist::get_key(board) % num_entries];
     if (phashe->key == Zobrist::get_key(board)) {

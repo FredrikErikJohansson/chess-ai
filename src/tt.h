@@ -21,7 +21,7 @@ public:
     TT() {};
 
     void init_hash(int size = 512);
-    int probe_hash(int depth, int alpha, int beta, bool color);
+    int probe_hash(int depth, bool color);
     void record_hash(int depth, int val, bool color);
     uint32_t num_entries;
     

@@ -1,6 +1,6 @@
 #include "search.h"
 
-int Search::evaluate(bool color, int depth_left) {
+int Search::evaluate(bool color) {
     int tmp_score = 0;
 
     for(int i = 0; i < 6; ++i) {
@@ -95,7 +95,7 @@ int Search::alpha_beta( int alpha, int beta, int depth_left, bool color, int& tm
         return ((piece_score[lhs.type] - piece_score[find_attacked_type(lhs)]) < (piece_score[rhs.type] - piece_score[find_attacked_type(rhs)]));
     });
 
-    int score = tt->probe_hash(depth_left, alpha, beta, color);
+    int score = tt->probe_hash(depth_left, color);
     if (score != valUNKNOWN) {
         ++in_tt;
         return score;
@@ -160,7 +160,7 @@ int Search::quiesce(int alpha, int beta, bool color, int depth_left, int& tmp_it
 
     movegen->calculate_all_moves();
 
-    int score = tt->probe_hash(depth_left, alpha, beta, color);
+    int score = tt->probe_hash(depth_left, color);
     if (score != valUNKNOWN) {
         ++in_tt;
         return score;
@@ -187,7 +187,7 @@ int Search::quiesce(int alpha, int beta, bool color, int depth_left, int& tmp_it
     }
 
     if(depth_left == 0 || board->moves[color].size() < 1) {
-        score = evaluate(color, 0);
+        score = evaluate(color);
         tt->record_hash(depth_left, score, color);
         return score;
     }
@@ -223,7 +223,7 @@ int Search::quiesce(int alpha, int beta, bool color, int depth_left, int& tmp_it
     }
 
     if(best_score == INT32_MIN) {
-        best_score = evaluate(color, 0);
+        best_score = evaluate(color);
         tt->record_hash(depth_left, score, color);
         return best_score;
     }

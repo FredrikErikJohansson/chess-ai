@@ -26,7 +26,7 @@ public:
     Move alpha_beta_first( int alpha, int beta, int depthleft, bool color, int&, int&, int&);
 
     int alpha_beta( int alpha, int beta, int depthleft, bool color, int&, int&, int&);
-    int evaluate(bool color, int depth_left);
+    int evaluate(bool color);
     int quiesce( int alpha, int beta, bool color, int depth_left, int&, int&, int&);
 
     int find_attacked_type(Move const& move);
@@ -39,8 +39,8 @@ private:
     Board* board;
     Movegen* movegen;
     TT* tt;
-    int max_depth = 6;
-    int q_max_depth = 2;
+    int max_depth = 4;
+    int q_max_depth = 3;
     int score = 0;
     std::array<int, 6> piece_score = { PAWN_SCORE, KNIGHT_SCORE, BISHOP_SCORE, ROOK_SCORE, QUEEN_SCORE, KING_SCORE };
 
