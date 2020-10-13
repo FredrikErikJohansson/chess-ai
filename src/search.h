@@ -1,5 +1,6 @@
 #include "board.h"
 #include "movegen.h"
+#include "tt.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -14,9 +15,10 @@
 
 class Search {
 public:
-    Search(Board* board, Movegen* movegen) { 
+    Search(Board* board, Movegen* movegen, TT* tt) { 
         this->board = board; 
         this->movegen = movegen;
+        this->tt = tt;
     }
     Search() {};
 
@@ -35,6 +37,7 @@ public:
 private:
     Board* board;
     Movegen* movegen;
+    TT* tt;
     int max_depth = 6;
     int score = 0;
     std::array<int, 6> piece_score = { PAWN_SCORE, KNIGHT_SCORE, BISHOP_SCORE, ROOK_SCORE, QUEEN_SCORE, KING_SCORE };

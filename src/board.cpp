@@ -100,7 +100,7 @@ void Board::print_visualization(Board const board) {
 }
 
 uint_fast16_t Board::find_board(bool color, Bitboard pos) {
-    uint_fast16_t i;
+    int i;
     for (i = 5; i >= 0; --i) {
         if (pieces[color][i] & pos) {
             break;
