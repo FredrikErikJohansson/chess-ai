@@ -96,6 +96,8 @@ Move Search::alpha_beta_first( int alpha, int beta, int depth_left, bool color, 
         ++tmp_iterations;
         best_score = -alpha_beta( -beta, -alpha, depth_left - 1, !color, tmp_iterations, cutoffs, in_tt);
 
+        std::cout << best_move << std::endl;
+
         movegen->unmake_move();
         movegen->calculate_all_moves();
 
@@ -118,11 +120,11 @@ int Search::alpha_beta( int alpha, int beta, int depth_left, bool color, int& tm
         return ((piece_score[lhs.type] - piece_score[find_attacked_type(lhs)]) < (piece_score[rhs.type] - piece_score[find_attacked_type(rhs)]));
     });
 
-    int score = tt->probe_hash(depth_left, color);
-    if (score != valUNKNOWN) {
-        ++in_tt;
-        return score;
-    }
+    // int score = tt->probe_hash(depth_left, color);
+    // if (score != valUNKNOWN) {
+    //     ++in_tt;
+    //     return score;
+    // }
 
     int best_score = INT32_MIN;
     score = INT32_MIN;
@@ -183,11 +185,11 @@ int Search::quiesce(int alpha, int beta, bool color, int depth_left, int& tmp_it
 
     movegen->calculate_all_moves();
 
-    int score = tt->probe_hash(depth_left, color);
-    if (score != valUNKNOWN) {
-        ++in_tt;
-        return score;
-    }
+    // int score = tt->probe_hash(depth_left, color);
+    // if (score != valUNKNOWN) {
+    //     ++in_tt;
+    //     return score;
+    // }
 
     int best_score = INT32_MIN;
     score = INT32_MIN;
