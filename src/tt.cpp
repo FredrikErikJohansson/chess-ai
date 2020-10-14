@@ -38,7 +38,7 @@ void TT::record_hash(int depth, int val, bool color) {
     HASHE* phashe = &table[Zobrist::get_key(board) % num_entries];
 
     phashe->key = Zobrist::get_key(board);
-    phashe->value = val;
+    phashe->value = (color) ? val : -val;
     phashe->depth = depth;
     phashe->color = color;
 }

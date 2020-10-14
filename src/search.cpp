@@ -96,7 +96,7 @@ Move Search::alpha_beta_first( int alpha, int beta, int depth_left, bool color, 
         ++tmp_iterations;
         best_score = -alpha_beta( -beta, -alpha, depth_left - 1, !color, tmp_iterations, cutoffs, in_tt);
 
-        std::cout << best_move << std::endl;
+        //std::cout << best_score<< std::endl;
 
         movegen->unmake_move();
         movegen->calculate_all_moves();
@@ -148,7 +148,7 @@ int Search::alpha_beta( int alpha, int beta, int depth_left, bool color, int& tm
     // Terminal node or maximum depth
     if(depth_left == 0 || board->moves[color].size() < 1) {
         score = quiesce(alpha, beta, color, q_max_depth, tmp_iterations, cutoffs, in_tt);
-        tt->record_hash(depth_left, score, color);
+        //tt->record_hash(depth_left, score, color);
         return score;
     }
 
@@ -197,23 +197,23 @@ int Search::quiesce(int alpha, int beta, bool color, int depth_left, int& tmp_it
     // Terminal node or maximum depth
     if(board->moves[color].size() < 1) {
         if(movegen->attacks_to_king(board->pieces[color][KING], color) != 0) {
-            score = -((INT32_MAX/2) + (depth_left));
-            tt->record_hash(depth_left, score, color);
+            score = -((INT32_MAX/2) + (depth_left + get_max_depth()));
+            tt->record_hash(depth_left + get_max_depth(), score, color);
             return score; // Self checkmate
         }
     }
 
     if(board->moves[!color].size() < 1) {
         if(movegen->attacks_to_king(board->pieces[!color][KING], !color) != 0) {
-            score = ((INT32_MAX/2) + (depth_left));
-            tt->record_hash(depth_left, score, color);
+            score = ((INT32_MAX/2) + (depth_left + get_max_depth()));
+            tt->record_hash(depth_left + get_max_depth(), score, color);
             return score; // Opp checkmate
         }
     }
 
     if(depth_left == 0 || board->moves[color].size() < 1) {
         score = evaluate(color);
-        tt->record_hash(depth_left, score, color);
+        //tt->record_hash(depth_left + get_max_depth(), score, color);
         return score;
     }
 
@@ -249,7 +249,7 @@ int Search::quiesce(int alpha, int beta, bool color, int depth_left, int& tmp_it
 
     if(best_score == INT32_MIN) {
         best_score = evaluate(color);
-        tt->record_hash(depth_left, score, color);
+        //tt->record_hash(depth_left + get_max_depth(), score, color);
         return best_score;
     }
     return best_score;

@@ -12,7 +12,7 @@ int main() {
     chessBoard.initialize();
     Movegen moveGen = Movegen(&chessBoard);
     TT table = TT(&chessBoard);
-    table.init_hash(512);
+    table.init_hash(256);
     Zobrist::init_keys();
     Search search = Search(&chessBoard, &moveGen, &table);
     int turn = 0;
@@ -68,7 +68,7 @@ int main() {
 
             std::cout << "Iterations: " << iterations << std::endl;
             std::cout << "Cutoffs: " << cutoffs << std::endl;
-            std::cout << "Found in tt: " << in_tt << std::endl;
+            // std::cout << "Found in tt: " << in_tt << std::endl;
             std::cout << "Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-begin).count() << "ms" << std::endl;
             std::cout << "State stack size: " << chessBoard.history.size() << std::endl;
 
