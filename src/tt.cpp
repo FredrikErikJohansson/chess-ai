@@ -16,7 +16,7 @@ void TT::init_hash(int size){
     }
 
     table = new HASHE[num_entries];
-    std::cout << "Hash Table size: " << num_entries * sizeof(HASHE)/0x100000 << " MB" << std::endl;
+    //std::cout << "Hash Table size: " << num_entries * sizeof(HASHE)/0x100000 << " MB" << std::endl;
 }
 
 int TT::probe_hash(int depth, bool color) {

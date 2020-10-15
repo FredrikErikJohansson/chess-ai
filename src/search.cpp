@@ -132,7 +132,7 @@ int Search::alpha_beta( int alpha, int beta, int depth_left, bool color, int& tm
     if(board->moves[color].size() < 1) {
         if(movegen->attacks_to_king(board->pieces[color][KING], color) != 0) {
             score = -((INT32_MAX/2) + (depth_left));
-            tt->record_hash(depth_left, score, color);
+            //tt->record_hash(depth_left, score, color);
             return score; // Self checkmate
         }
     }
@@ -140,7 +140,7 @@ int Search::alpha_beta( int alpha, int beta, int depth_left, bool color, int& tm
     if(board->moves[!color].size() < 1) {
         if(movegen->attacks_to_king(board->pieces[!color][KING], !color) != 0) {
             score = ((INT32_MAX/2) + (depth_left));
-            tt->record_hash(depth_left, score, color);
+            //tt->record_hash(depth_left, score, color);
             return score; // Opp checkmate
         }
     }
@@ -198,7 +198,7 @@ int Search::quiesce(int alpha, int beta, bool color, int depth_left, int& tmp_it
     if(board->moves[color].size() < 1) {
         if(movegen->attacks_to_king(board->pieces[color][KING], color) != 0) {
             score = -((INT32_MAX/2) + (depth_left + get_max_depth()));
-            tt->record_hash(depth_left + get_max_depth(), score, color);
+            //tt->record_hash(depth_left + get_max_depth(), score, color);
             return score; // Self checkmate
         }
     }
@@ -206,7 +206,7 @@ int Search::quiesce(int alpha, int beta, bool color, int depth_left, int& tmp_it
     if(board->moves[!color].size() < 1) {
         if(movegen->attacks_to_king(board->pieces[!color][KING], !color) != 0) {
             score = ((INT32_MAX/2) + (depth_left + get_max_depth()));
-            tt->record_hash(depth_left + get_max_depth(), score, color);
+            //tt->record_hash(depth_left + get_max_depth(), score, color);
             return score; // Opp checkmate
         }
     }
