@@ -1,79 +1,85 @@
 #include "search.h"
 
-int Search::evaluate(bool color) {
+int Search::evaluate(bool color, int depth_left) {
     int tmp_score = 0;
+    
+    if(board->moves[color].size() < 1) {
+        if(movegen->attacks_to_king(board->pieces[color][KING], color) != 0) {
+            return -((INT32_MAX/2) + depth_left);
+        }
+    }
 
     for(int i = 0; i < 6; ++i) {
-        Bitboard bb = board->pieces[color][i];
         Bitboard bb_opp = board->pieces[!color][i];
-        for (int row = 7; row >= 0; --row) {
-            for (int col = 0; col <= 7; ++col) {
-                int counter = ((row * 8) + col);
-                if (bb & (1ULL << counter)) {
-                    tmp_score += piece_score[i]; // Material score
-                    
-                    // Positional score
-                    switch (i)
-                    {
-                    case 0:
-                        tmp_score += pawn_square_values[(color) ? counter : 63 - counter];
-                        break;
-                    case 1:
-                        tmp_score += knight_square_values[(color) ? counter : 63 - counter];
-                        break;
-                    case 2:
-                        tmp_score += bishop_square_values[(color) ? counter : 63 - counter];
-                        break;
-                    case 3:
-                        tmp_score += rook_square_values[(color) ? counter : 63 - counter];
-                        break;
-                    case 4:
-                        tmp_score += queen_square_values[(color) ? counter : 63 - counter];
-                        break;
-                    case 5:
-                        tmp_score += king_early_square_values[(color) ? counter : 63 - counter];
-                        break;
-                    
-                    default:
-                        break;
-                    }
-                }
-                if (bb_opp & (1ULL << counter)) {
-                    tmp_score -= piece_score[i]; // Material score
+        Bitboard bb = board->pieces[color][i];
 
-                    // Positional score
-                    switch (i)
-                    {
-                    case 0:
-                        tmp_score -= pawn_square_values[(!color) ? counter : 63 - counter];
-                        break;
-                    case 1:
-                        tmp_score -= knight_square_values[(!color) ? counter : 63 - counter];
-                        break;
-                    case 2:
-                        tmp_score -= bishop_square_values[(!color) ? counter : 63 - counter];
-                        break;
-                    case 3:
-                        tmp_score -= rook_square_values[(!color) ? counter : 63 - counter];
-                        break;
-                    case 4:
-                        tmp_score -= queen_square_values[(!color) ? counter : 63 - counter];
-                        break;
-                    case 5:
-                        tmp_score -= king_early_square_values[(!color) ? counter : 63 - counter];
-                        break;
-                    
-                    default:
-                        break;
-                    }
-                    
+        for (uint_fast16_t j = 0; j < 64; ++j) {
+            if ((bb & (1ULL << j)) != 0) {
+                tmp_score += piece_score[i]; // Material score
+
+                tmp_score += board->moves[color].size() * 10;
+
+                // Positional score
+                switch (i)
+                {
+                case 0:
+                    tmp_score += pawn_square_values[(!color) ? j : 63 - j];
+                    break;
+                case 1:
+                    tmp_score += knight_square_values[(!color) ? j : 63 - j];
+                    break;
+                case 2:
+                    tmp_score += bishop_square_values[(!color) ? j : 63 - j];
+                    break;
+                case 3:
+                    tmp_score += rook_square_values[(!color) ? j : 63 - j];
+                    break;
+                case 4:
+                    tmp_score += queen_square_values[(!color) ? j : 63 - j];
+                    break;
+                case 5:
+                    tmp_score += king_early_square_values[(!color) ? j : 63 - j];
+                    break;
+                
+                default:
+                    break;
                 }
-            counter++;
+            }
+
+            if((bb_opp & (1ULL << j)) != 0) {
+                tmp_score -= piece_score[i]; // Material score
+
+                tmp_score -= board->moves[!color].size() * 10;
+
+                switch (i)
+                {
+                case 0:
+                    tmp_score -= pawn_square_values[(color) ? j : 63 - j];
+                    break;
+                case 1:
+                    tmp_score -= knight_square_values[(color) ? j : 63 - j];
+                    break;
+                case 2:
+                    tmp_score -= bishop_square_values[(color) ? j : 63 - j];
+                    break;
+                case 3:
+                    tmp_score -= rook_square_values[(color) ? j : 63 - j];
+                    break;
+                case 4:
+                    tmp_score -= queen_square_values[(color) ? j : 63 - j];
+                    break;
+                case 5:
+                    tmp_score -= king_early_square_values[(color) ? j : 63 - j];
+                    break;
+                
+                default:
+                    break;
+                }
             }
         }
     }
 
-    return tmp_score;//((color) ? tmp_score : -tmp_score);
+    return tmp_score;
 }
 
 Move Search::alpha_beta_first( int alpha, int beta, int depth_left, bool color, int& tmp_iterations, int& cutoffs, int& in_tt) {
@@ -96,7 +102,7 @@ Move Search::alpha_beta_first( int alpha, int beta, int depth_left, bool color, 
         ++tmp_iterations;
         best_score = -alpha_beta( -beta, -alpha, depth_left - 1, !color, tmp_iterations, cutoffs, in_tt);
 
-        //std::cout << best_score<< std::endl;
+        std::cout << best_score<< std::endl;
 
         movegen->unmake_move();
         movegen->calculate_all_moves();
@@ -120,36 +126,17 @@ int Search::alpha_beta( int alpha, int beta, int depth_left, bool color, int& tm
         return ((piece_score[lhs.type] - piece_score[find_attacked_type(lhs)]) < (piece_score[rhs.type] - piece_score[find_attacked_type(rhs)]));
     });
 
-    // int score = tt->probe_hash(depth_left, color);
-    // if (score != valUNKNOWN) {
-    //     ++in_tt;
-    //     return score;
-    // }
-
     int best_score = INT32_MIN;
     score = INT32_MIN;
 
+    // Terminal node
     if(board->moves[color].size() < 1) {
-        if(movegen->attacks_to_king(board->pieces[color][KING], color) != 0) {
-            score = -((INT32_MAX/2) + (depth_left));
-            tt->record_hash(depth_left, score, color);
-            return score; // Self checkmate
-        }
+        return evaluate(color, depth_left);
     }
 
-    if(board->moves[!color].size() < 1) {
-        if(movegen->attacks_to_king(board->pieces[!color][KING], !color) != 0) {
-            score = ((INT32_MAX/2) + (depth_left));
-            tt->record_hash(depth_left, score, color);
-            return score; // Opp checkmate
-        }
-    }
-
-    // Terminal node or maximum depth
-    if(depth_left == 0 || board->moves[color].size() < 1) {
-        score = quiesce(alpha, beta, color, q_max_depth, tmp_iterations, cutoffs, in_tt);
-        //tt->record_hash(depth_left, score, color);
-        return score;
+    // Maximum depth
+    if(depth_left == 0) {
+        return quiesce(alpha, beta, color, q_max_depth, tmp_iterations, cutoffs, in_tt);
     }
 
     for(size_t i = 0; i < board->moves[color].size(); ++i) {
@@ -185,36 +172,11 @@ int Search::quiesce(int alpha, int beta, bool color, int depth_left, int& tmp_it
 
     movegen->calculate_all_moves();
 
-    // int score = tt->probe_hash(depth_left, color);
-    // if (score != valUNKNOWN) {
-    //     ++in_tt;
-    //     return score;
-    // }
-
     int best_score = INT32_MIN;
     score = INT32_MIN;
 
-    // Terminal node or maximum depth
-    if(board->moves[color].size() < 1) {
-        if(movegen->attacks_to_king(board->pieces[color][KING], color) != 0) {
-            score = -((INT32_MAX/2) + (depth_left + get_max_depth()));
-            tt->record_hash(depth_left + get_max_depth(), score, color);
-            return score; // Self checkmate
-        }
-    }
-
-    if(board->moves[!color].size() < 1) {
-        if(movegen->attacks_to_king(board->pieces[!color][KING], !color) != 0) {
-            score = ((INT32_MAX/2) + (depth_left + get_max_depth()));
-            tt->record_hash(depth_left + get_max_depth(), score, color);
-            return score; // Opp checkmate
-        }
-    }
-
     if(depth_left == 0 || board->moves[color].size() < 1) {
-        score = evaluate(color);
-        //tt->record_hash(depth_left + get_max_depth(), score, color);
-        return score;
+        return evaluate(color, -(q_max_depth - depth_left));
     }
 
 
@@ -248,9 +210,7 @@ int Search::quiesce(int alpha, int beta, bool color, int depth_left, int& tmp_it
     }
 
     if(best_score == INT32_MIN) {
-        best_score = evaluate(color);
-        //tt->record_hash(depth_left + get_max_depth(), score, color);
-        return best_score;
+        return evaluate(color, -(q_max_depth - depth_left));
     }
     return best_score;
 }

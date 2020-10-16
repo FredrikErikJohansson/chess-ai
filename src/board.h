@@ -38,6 +38,8 @@ public:
 	};
 
 	void initialize();
+	void puzzle_one(int);
+	void puzzle_two(int);
 	void clear();
 	
 	Bitboard get_all_white_pieces() const;

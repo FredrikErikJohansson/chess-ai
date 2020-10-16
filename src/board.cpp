@@ -20,6 +20,32 @@ void Board::initialize() {
     // castle[WHITE] = 
 }
 
+void Board::puzzle_one(int puzzle) {
+    pieces[WHITE].fill(0);
+    pieces[BLACK].fill(0);
+
+    int idx = 0;
+    for(int i = 0; i < 2; ++i) {
+        for(int j = 0; j < 6; ++j) {
+            pieces[i][j] = Bitboards::PUZZLE_ONE[puzzle][idx];
+            idx++;
+        }
+    }
+}
+
+void Board::puzzle_two(int puzzle) {
+    pieces[WHITE].fill(0);
+    pieces[BLACK].fill(0);
+
+    int idx = 0;
+    for(int i = 0; i < 2; ++i) {
+        for(int j = 0; j < 6; ++j) {
+            pieces[i][j] = Bitboards::PUZZLE_TWO[puzzle][idx];
+            idx++;
+        }
+    }
+}
+
 void Board::clear() {
     pieces[WHITE].fill(0);
     pieces[BLACK].fill(0);

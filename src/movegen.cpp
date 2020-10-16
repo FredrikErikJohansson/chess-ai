@@ -65,8 +65,8 @@ void Movegen::make_move(Move move, bool from_check) {
         }
     }
     // TODO: Not correct -> this may lead to multiple castles
-    if(move.type == KING) board->can_castle[move.color] = false;
-    if(move.type == ROOK && (rook_start & board->pieces[move.color][ROOK]) == 0) board->can_castle[move.color] = false;
+    // if(move.type == KING) board->can_castle[move.color] = false;
+    // if(move.type == ROOK && (rook_start & board->pieces[move.color][ROOK]) == 0) board->can_castle[move.color] = false;
     
     // Check for check
     if(move.check) {
@@ -409,14 +409,14 @@ Bitboard Movegen::under_attack(bool color) {
         
         // Check opponent pawns
         if(move.color) {
-            if(((move.to << 9) & board->pieces[BLACK][PAWN]) != 0 ||
-                ((move.to << 7) & board->pieces[BLACK][PAWN]) != 0) {
+            if((((Bitboards::COLUMN_CLEAR[7] & move.to) << 9) & (board->pieces[BLACK][PAWN])) != 0 ||
+                (((Bitboards::COLUMN_CLEAR[0] & move.to) << 7) & (board->pieces[BLACK][PAWN])) != 0) {
                 unmake_move();
                 return false;
             }
         } else {
-            if(((move.to >> 9) & board->pieces[WHITE][PAWN]) != 0 ||
-                ((move.to >> 7) & board->pieces[WHITE][PAWN]) != 0) {
+            if((((Bitboards::COLUMN_CLEAR[0] & move.to) >> 9) & (board->pieces[WHITE][PAWN])) != 0 ||
+                (((Bitboards::COLUMN_CLEAR[7] & move.to) >> 7) & (board->pieces[WHITE][PAWN])) != 0) {
                 unmake_move();
                 return false;
             }

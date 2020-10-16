@@ -10,6 +10,8 @@ int main() {
     Board chessBoard;
     Player player;
     chessBoard.initialize();
+    chessBoard.puzzle_two(0);
+    chessBoard.print_visualization(chessBoard);
     Movegen moveGen = Movegen(&chessBoard);
     TT table = TT(&chessBoard);
     table.init_hash(256);

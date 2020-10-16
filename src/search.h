@@ -26,7 +26,7 @@ public:
     Move alpha_beta_first( int alpha, int beta, int depthleft, bool color, int&, int&, int&);
 
     int alpha_beta( int alpha, int beta, int depthleft, bool color, int&, int&, int&);
-    int evaluate(bool color);
+    int evaluate(bool color, int depth_left);
     int quiesce( int alpha, int beta, bool color, int depth_left, int&, int&, int&);
 
     int find_attacked_type(Move const& move);
