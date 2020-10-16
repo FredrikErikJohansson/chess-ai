@@ -5,7 +5,7 @@ int Search::evaluate(bool color, int depth_left) {
     
     if(board->moves[color].size() < 1) {
         if(movegen->attacks_to_king(board->pieces[color][KING], color) != 0) {
-            return -((INT32_MAX/2) + depth_left);
+            return -((INT32_MAX/2) + depth_left); // Checkmate
         }
     }
 
@@ -17,7 +17,7 @@ int Search::evaluate(bool color, int depth_left) {
             if ((bb & (1ULL << j)) != 0) {
                 tmp_score += piece_score[i]; // Material score
 
-                tmp_score += board->moves[color].size() * 10;
+                tmp_score += board->moves[color].size() * 10; // Mobility score
 
                 // Positional score
                 switch (i)
@@ -49,7 +49,7 @@ int Search::evaluate(bool color, int depth_left) {
             if((bb_opp & (1ULL << j)) != 0) {
                 tmp_score -= piece_score[i]; // Material score
 
-                tmp_score -= board->moves[!color].size() * 10;
+                tmp_score -= board->moves[!color].size() * 10; // Mobility score
 
                 switch (i)
                 {
@@ -84,11 +84,6 @@ int Search::evaluate(bool color, int depth_left) {
 
 Move Search::alpha_beta_first( int alpha, int beta, int depth_left, bool color, int& tmp_iterations, int& cutoffs, int& in_tt) {
     movegen->calculate_all_moves();
-
-    std::sort( board->moves[color].begin(), board->moves[color].end(), [this]( const Move& lhs, const Move& rhs )
-    {   
-        return ((piece_score[lhs.type] - piece_score[find_attacked_type(lhs)]) < (piece_score[rhs.type] - piece_score[find_attacked_type(rhs)]));
-    });
 
     int max_score = INT32_MIN;
     int best_score = max_score;
