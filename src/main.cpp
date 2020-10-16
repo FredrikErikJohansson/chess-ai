@@ -10,7 +10,7 @@ int main() {
     Board chessBoard;
     Player player;
     chessBoard.initialize();
-    chessBoard.puzzle_two(1);
+    //chessBoard.puzzle_two(1);
     chessBoard.print_visualization(chessBoard);
     Movegen moveGen = Movegen(&chessBoard);
     TT table = TT(&chessBoard);
@@ -18,6 +18,7 @@ int main() {
     Zobrist::init_keys();
     Search search = Search(&chessBoard, &moveGen, &table);
     int turn = 0;
+    double total_time = 0;
 
     // Game loop
     while(1) { 
@@ -55,8 +56,8 @@ int main() {
 
         if(!is_white_turn || !is_player) {
             // Set search depth (ply)
-            search.set_max_depth(4);
-            search.set_q_max_depth(4);
+            search.set_max_depth(5);
+            search.set_q_max_depth(2);
             int alpha = INT32_MIN;
             int beta = INT32_MAX;
             int iterations = 0;
@@ -67,6 +68,7 @@ int main() {
             auto begin = std::chrono::high_resolution_clock::now();
             auto move = search.alpha_beta_first(alpha, beta, search.get_max_depth(), is_white_turn, iterations, cutoffs, in_tt);
             auto end = std::chrono::high_resolution_clock::now();
+            total_time += std::chrono::duration_cast<std::chrono::milliseconds>(end-begin).count();
 
             std::cout << "Iterations: " << iterations << std::endl;
             std::cout << "Cutoffs: " << cutoffs << std::endl;
@@ -103,6 +105,8 @@ int main() {
         std::cout << "Press ENTER to continue: " << std::endl;
         std::cin.get();
     }
+
+    std::cout << "Average move time: " << total_time / chessBoard.history.size() << std::endl;
 
     return 1;
 }

@@ -97,7 +97,7 @@ Move Search::alpha_beta_first( int alpha, int beta, int depth_left, bool color, 
         ++tmp_iterations;
         best_score = -alpha_beta( -beta, -alpha, depth_left - 1, !color, tmp_iterations, cutoffs, in_tt);
 
-        std::cout << best_score<< std::endl;
+        //std::cout << best_score<< std::endl;
 
         movegen->unmake_move();
         movegen->calculate_all_moves();
