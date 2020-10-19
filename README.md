@@ -19,7 +19,7 @@ Chess engine implemented from scratch in C++.
   * Castle
   * Promotion
 * Search
-  * Minimax with alpha-beta pruning
+  * Negamax with alpha-beta pruning
   * Quiescence search
 * Evaluation
   * Material
