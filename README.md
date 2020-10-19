@@ -1,8 +1,11 @@
 # Chess-ai
 Chess engine implemented from scratch in C++. 
 
+![Board](img/board.png)
+
 ## Table of contents
 * [Features](#Features)
+* [Requirements](#Requirements)
 * [Getting started](#Getting-started)
   * [Linux](#Linux)
   * [Windows](#Windows)
@@ -22,10 +25,14 @@ Chess engine implemented from scratch in C++.
   * Material
   * Positional
 
+## Requirements
+* UTF-8 compatible shell
+* C++11 or better
+
 ## Getting started
 ### Linux
 ```
-  clone https://github.com/FredrikErikJohansson/chess-ai.git
+  git clone https://github.com/FredrikErikJohansson/chess-ai.git
   cd chess-ai
   make
   ./chess
@@ -33,7 +40,7 @@ Chess engine implemented from scratch in C++.
 
 ### Windows
 ```
-  clone https://github.com/FredrikErikJohansson/chess-ai.git
+  git clone https://github.com/FredrikErikJohansson/chess-ai.git
 ```
 Include the `src/` directory into a Visual Sudio project and run from the IDE. You may have to tweak some compiler flags to get optimal performance.
 
