@@ -1,5 +1,5 @@
 # Chess-ai
-Chess engine implemented from scratch in C++. 
+Chess engine implemented from scratch in C++. The associated paper ["Chess engine with an integrated AI"](./img/TNM095___Report.pdf) contains the theory and how I implemented the engine.
 
 ![Board](img/board.png)
 
